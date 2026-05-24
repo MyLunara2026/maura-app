@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import requests
+import os
 
 # --- CONFIGURAÇÕES TÉCNICAS (CONECTANDO AOS SECRETS DO STREAMLIT) ---
 try:
@@ -18,16 +19,24 @@ HEADERS = {
 }
 
 # --- CONFIGURAÇÃO DA PÁGINA (ESTÉTICA) ---
-st.set_page_config(page_title="Maura | Produção Pro", layout="wide", page_icon="💎")
+st.set_page_config(page_title="Maura | Production Pro", layout="wide", page_icon="💎")
 
-# --- CONFIGURAÇÃO DO ÍCONE PARA O ECRÃ INICIAL DO IPHONE ---
-# Ícone temporário em alta resolução (Link público seguro)
-LINK_LOGO_TEMPORARIO = "https://cdn-icons-png.flaticon.com/512/2885/2885994.png"
+# --- SISTEMA DE ARMAZENAMENTO DO LOGO ---
+LOGO_FILE = "logo_base64.txt"
+logo_link = "https://cdn-icons-png.flaticon.com/512/2885/2885994.png"  # Ícone padrão (Diamante)
 
+# Verificar se já existe um logo personalizado gravado
+if os.path.exists(LOGO_FILE):
+    with open(LOGO_FILE, "r") as f:
+        logo_b64 = f.read().strip()
+        if logo_b64:
+            logo_link = f"data:image/png;base64,{logo_b64}"
+
+# Injetar o ícone nas configurações do navegador e iOS
 st.markdown(f"""
     <head>
-        <link rel="apple-touch-icon" sizes="180x180" href="{LINK_LOGO_TEMPORARIO}">
-        <link rel="icon" type="image/png" sizes="32x32" href="{LINK_LOGO_TEMPORARIO}">
+        <link rel="apple-touch-icon" sizes="180x180" href="{logo_link}">
+        <link rel="icon" type="image/png" sizes="32x32" href="{logo_link}">
     </head>
     """, unsafe_allow_html=True)
 
@@ -35,32 +44,32 @@ st.markdown(f"""
 st.markdown("""
     <style>
     /* Fundo da aplicação em Bege Suave */
-    .stApp { 
+    .stApp {{ 
         background-color: #f4ecd8 !important; 
-    }
+    }}
     
     /* Customização dos Inputs (Caixas de texto e números) */
-    div[data-testid="stWidgetLabel"] p {
+    div[data-testid="stWidgetLabel"] p {{
         color: #002b5b !important;
         font-weight: bold !important;
-    }
-    div[data-baseweb="input"], div[data-baseweb="number-input"] {
+    }}
+    div[data-baseweb="input"], div[data-baseweb="number-input"] {{
         border: 2px solid #cfa134 !important;
         border-radius: 6px !important;
         background-color: white !important;
-    }
+    }}
     
     /* Bloco do Formulário Esquerdo */
-    div[data-testid="stForm"] {
+    div[data-testid="stForm"] {{
         border: 2px solid #002b5b !important;
         border-radius: 12px !important;
         padding: 25px !important;
         background-color: #fdfbf7 !important;
         box-shadow: 0 6px 15px rgba(0,0,0,0.05) !important;
-    }
+    }}
     
     /* BOTÃO VERDE: CALCULAR E GUARDAR */
-    div.stButton > button:first-child {
+    div.stButton > button:first-child {{
         width: 100%;
         background-color: #27ae60 !important;
         color: white !important;
@@ -71,15 +80,15 @@ st.markdown("""
         border: none !important;
         box-shadow: 0 4px 6px rgba(39,174,96,0.2);
         transition: all 0.2s ease;
-    }
-    div.stButton > button:first-child:hover { 
+    }}
+    div.stButton > button:first-child:hover {{ 
         background-color: #1e7e43 !important;
         box-shadow: 0 4px 12px rgba(39,174,96,0.4);
         transform: translateY(-1px);
-    }
+    }}
     
     /* BOTÃO VERMELHO: CONFIRMAR ELIMINAÇÃO */
-    div[data-testid="stExpander"] button {
+    div[data-testid="stExpander"] button {{
         background-color: #c0392b !important;
         color: white !important;
         border-radius: 6px !important;
@@ -87,11 +96,11 @@ st.markdown("""
         border: none !important;
         width: 100%;
         height: 3em;
-    }
-    div[data-testid="stExpander"] button:hover {
+    }}
+    div[data-testid="stExpander"] button:hover {{
         background-color: #a93226 !important;
         color: white !important;
-    }
+    }}
     </style>
     """, unsafe_allow_html=True)
 
@@ -124,7 +133,7 @@ with col1:
         extra = st.number_input("Material Extra (€)", min_value=0.0, value=0.50, step=0.10)
         mult = st.number_input("Multiplicador Mão de Obra (x)", min_value=1.0, value=3.0, step=0.5)
         
-        submetido = st.form_submit_button("ADICIONAR & GUARDAR NA NUVEM")
+        submetido = st.form_submit_button("ADICIONAR")
 
 if submetido:
     if molde and v_total > 0:
@@ -153,7 +162,7 @@ if submetido:
             st.rerun()
 
 with col2:
-    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px;'>📊 Histórico de Production</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px;'>📊 Histórico de Produção</h3>", unsafe_allow_html=True)
     
     # Executa a busca de dados de forma isolada e segura
     linhas = []
@@ -190,3 +199,16 @@ with col2:
             st.info("A base de dados está vazia. Adicione o seu primeiro molde à esquerda.")
     else:
         st.error("Não foi possível estabelecer ligação com a nuvem.")
+
+    # --- ÁREA SEGREDA PARA FAZER O UPLOAD DO LOGO DA LUNARA ---
+    st.write("---")
+    with st.expander("⚙️ Configurações de Marca (Logótipo Lunara)"):
+        import base64
+        uploaded_file = st.file_uploader("Selecione a imagem do seu logotipo (PNG ou JPG):", type=["png", "jpg", "jpeg"])
+        if uploaded_file is not None:
+            bytes_data = uploaded_file.read()
+            base64_encoded = base64.b64encode(bytes_data).decode("utf-8")
+            with open(LOGO_FILE, "w") as f:
+                f.write(base64_encoded)
+            st.success("Logótipo gravado com sucesso! Atualize a página.")
+            st.rerun()
