@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import requests
 import os
-import base64
 
 # --- CONFIGURAÇÕES TÉCNICAS (CONECTANDO AOS SECRETS DO STREAMLIT) ---
 try:
@@ -19,34 +18,26 @@ HEADERS = {
     "Prefer": "return=representation"
 }
 
-# --- PROCESSAMENTO DO ÍCONE NATIVO ---
-# Se o logo.png existir, convertemos para base64 para injetar de forma estável no HTML do iOS
-icone_html = ""
-if os.path.exists("logo.png"):
-    try:
-        with open("logo.png", "rb") as image_file:
-            encoded_string = base64.b64encode(image_file.read()).decode()
-            icone_html = f"data:image/png;base64,{encoded_string}"
-    except:
-        pass
+# --- LINK DIRETO DO TEU LOGO NO GITHUB ---
+# Usando o link "raw" do GitHub, o iPhone consegue descarregar a imagem diretamente sem bloqueios
+LINK_PUBLICO_LOGO = "https://raw.githubusercontent.com/MyLunara2026/maura-app/main/logo.png"
 
 # Configuração Base da Página (Aba do Navegador)
 st.set_page_config(
     page_title="Maura | Produção Pro", 
     layout="wide", 
-    page_icon="logo.png" if os.path.exists("logo.png") else "💎"
+    page_icon=LINK_PUBLICO_LOGO
 )
 
-# Injeção prioritária do cabeçalho de ícone para Apple iOS (iPhone)
-if icone_html:
-    st.markdown(f"""
-        <head>
-            <link rel="apple-touch-icon" sizes="180x180" href="{icone_html}">
-            <link rel="icon" type="image/png" sizes="32x32" href="{icone_html}">
-        </head>
-        """, unsafe_allow_html=True)
+# Injeção forçada do cabeçalho de ícone para Apple iOS (iPhone)
+st.markdown(f"""
+    <head>
+        <link rel="apple-touch-icon" sizes="180x180" href="{LINK_PUBLICO_LOGO}">
+        <link rel="icon" type="image/png" sizes="32x32" href="{LINK_PUBLICO_LOGO}">
+    </head>
+    """, unsafe_allow_html=True)
 
-# --- DESIGN PERSONALIZADO (RESTABELECENDO O BEGE, DOURADO, VERDE E VERMELHO) ---
+# --- DESIGN PERSONALIZADO (BEGE, DOURADO, VERDE E VERMELHO) ---
 st.markdown("""
     <style>
     /* Fundo da aplicação em Bege Suave */
