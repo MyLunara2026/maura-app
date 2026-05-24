@@ -111,7 +111,7 @@ with col1:
         extra = st.number_input("Material Extra (€)", min_value=0.0, value=0.50, step=0.10)
         mult = st.number_input("Multiplicador Mão de Obra (x)", min_value=1.0, value=3.0, step=0.5)
         
-        submetido = st.form_submit_button("ADICIONAR & GUARDAR NA NUVEM")
+        submetido = st.form_submit_button("ADICIONAR")
 
 if submetido:
     if molde and v_total > 0:
