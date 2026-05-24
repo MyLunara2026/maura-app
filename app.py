@@ -19,7 +19,7 @@ HEADERS = {
 }
 
 # --- CONFIGURAÇÃO DA PÁGINA (ESTÉTICA) ---
-st.set_page_config(page_title="Maura | Production Pro", layout="wide", page_icon="💎")
+st.set_page_config(page_title="Maura | Produção Pro", layout="wide", page_icon="💎")
 
 # --- SISTEMA DE ARMAZENAMENTO DO LOGO ---
 LOGO_FILE = "logo_base64.txt"
@@ -40,36 +40,36 @@ st.markdown(f"""
     </head>
     """, unsafe_allow_html=True)
 
-# --- DESIGN PERSONALIZADO (CORES DA TUA APLICAÇÃO: BEGE, DOURADO, VERDE E VERMELHO) ---
+# --- DESIGN PERSONALIZADO (RESTABELECENDO O BEGE, DOURADO, VERDE E VERMELHO) ---
 st.markdown("""
     <style>
     /* Fundo da aplicação em Bege Suave */
-    .stApp {{ 
+    .stApp { 
         background-color: #f4ecd8 !important; 
-    }}
+    }
     
     /* Customização dos Inputs (Caixas de texto e números) */
-    div[data-testid="stWidgetLabel"] p {{
+    div[data-testid="stWidgetLabel"] p {
         color: #002b5b !important;
         font-weight: bold !important;
-    }}
-    div[data-baseweb="input"], div[data-baseweb="number-input"] {{
+    }
+    div[data-baseweb="input"], div[data-baseweb="number-input"] {
         border: 2px solid #cfa134 !important;
         border-radius: 6px !important;
         background-color: white !important;
-    }}
+    }
     
     /* Bloco do Formulário Esquerdo */
-    div[data-testid="stForm"] {{
+    div[data-testid="stForm"] {
         border: 2px solid #002b5b !important;
         border-radius: 12px !important;
         padding: 25px !important;
         background-color: #fdfbf7 !important;
         box-shadow: 0 6px 15px rgba(0,0,0,0.05) !important;
-    }}
+    }
     
     /* BOTÃO VERDE: CALCULAR E GUARDAR */
-    div.stButton > button:first-child {{
+    div.stButton > button:first-child {
         width: 100%;
         background-color: #27ae60 !important;
         color: white !important;
@@ -80,15 +80,15 @@ st.markdown("""
         border: none !important;
         box-shadow: 0 4px 6px rgba(39,174,96,0.2);
         transition: all 0.2s ease;
-    }}
-    div.stButton > button:first-child:hover {{ 
+    }
+    div.stButton > button:first-child:hover { 
         background-color: #1e7e43 !important;
         box-shadow: 0 4px 12px rgba(39,174,96,0.4);
         transform: translateY(-1px);
-    }}
+    }
     
     /* BOTÃO VERMELHO: CONFIRMAR ELIMINAÇÃO */
-    div[data-testid="stExpander"] button {{
+    div[data-testid="stExpander"] button {
         background-color: #c0392b !important;
         color: white !important;
         border-radius: 6px !important;
@@ -96,11 +96,11 @@ st.markdown("""
         border: none !important;
         width: 100%;
         height: 3em;
-    }}
-    div[data-testid="stExpander"] button:hover {{
+    }
+    div[data-testid="stExpander"] button:hover {
         background-color: #a93226 !important;
         color: white !important;
-    }}
+    }
     </style>
     """, unsafe_allow_html=True)
 
