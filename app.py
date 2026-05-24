@@ -107,8 +107,33 @@ if submetido:
             else:
                 st.error(f"Erro ao guardar no servidor (Código {res.status_code})")
         except:
-            # Proteção preventiva: se os dados já entraram na tabela (visto no rerun), ignora falsos alarmes de conexão
             st.rerun()
 
 with col2:
-    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif;'>📊 Histórico de Produ
+    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif;'>📊 Histórico de Produção</h3>", unsafe_allow_html=True)
+    try:
+        response_get = requests.get(f"{SUPABASE_URL}/rest/v1/moldes?select=*&order=id.desc", headers=HEADERS)
+        if response_get.status_code == 200:
+            linhas = response_get.json()
+            if linhas:
+                df = pd.DataFrame(linhas)
+                df_visual = df[["molde", "tipo", "agua", "gesso", "cera", "custo_mat", "valor_final"]]
+                df_visual.columns = ["Molde", "Tipo", "Água", "Gesso", "Cera", "Custo Mat.", "PREÇO FINAL"]
+                
+                st.dataframe(df_visual, use_container_width=True, hide_index=True)
+                
+                st.write("")
+                with st.expander("🗑️ Opções de Gestão (Eliminar Registo)"):
+                    lista_moldes = list(set([i["molde"] for i in linhas if "molde" in i]))
+                    molde_apagar = st.selectbox("Selecione o molde a remover:", lista_moldes)
+                    
+                    if st.button("CONFIRMAR ELIMINAÇÃO PERMANENTE"):
+                        res_del = requests.delete(f"{SUPABASE_URL}/rest/v1/moldes?molde=eq.{molde_apagar}", headers=HEADERS)
+                        if res_del.status_code in [200, 204]:
+                            st.rerun()
+            else:
+                st.info("A base de dados está vazia. Adicione o seu primeiro molde à esquerda.")
+        else:
+            st.error(f"O banco de dados recusou o acesso (Erro {response_get.status_code}). Verifique se os Secrets estão bem salvos.")
+    except:
+        st.error("Não foi possível estabelecer ligação com a nuvem.")
