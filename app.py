@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import requests
 import os
+import base64
 
 # --- CONFIGURAÇÕES TÉCNICAS (CONECTANDO AOS SECRETS DO STREAMLIT) ---
 try:
@@ -18,27 +19,32 @@ HEADERS = {
     "Prefer": "return=representation"
 }
 
-# --- CONFIGURAÇÃO DA PÁGINA (ESTÉTICA) ---
-st.set_page_config(page_title="Maura | Produção Pro", layout="wide", page_icon="💎")
+# --- PROCESSAMENTO DO ÍCONE NATIVO ---
+# Se o logo.png existir, convertemos para base64 para injetar de forma estável no HTML do iOS
+icone_html = ""
+if os.path.exists("logo.png"):
+    try:
+        with open("logo.png", "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read()).decode()
+            icone_html = f"data:image/png;base64,{encoded_string}"
+    except:
+        pass
 
-# --- SISTEMA DE ARMAZENAMENTO DO LOGO ---
-LOGO_FILE = "logo_base64.txt"
-logo_link = "https://cdn-icons-png.flaticon.com/512/2885/2885994.png"  # Ícone padrão (Diamante)
+# Configuração Base da Página (Aba do Navegador)
+st.set_page_config(
+    page_title="Maura | Produção Pro", 
+    layout="wide", 
+    page_icon="logo.png" if os.path.exists("logo.png") else "💎"
+)
 
-# Verificar se já existe um logo personalizado gravado
-if os.path.exists(LOGO_FILE):
-    with open(LOGO_FILE, "r") as f:
-        logo_b64 = f.read().strip()
-        if logo_b64:
-            logo_link = f"data:image/png;base64,{logo_b64}"
-
-# Injetar o ícone nas configurações do navegador e iOS
-st.markdown(f"""
-    <head>
-        <link rel="apple-touch-icon" sizes="180x180" href="{logo_link}">
-        <link rel="icon" type="image/png" sizes="32x32" href="{logo_link}">
-    </head>
-    """, unsafe_allow_html=True)
+# Injeção prioritária do cabeçalho de ícone para Apple iOS (iPhone)
+if icone_html:
+    st.markdown(f"""
+        <head>
+            <link rel="apple-touch-icon" sizes="180x180" href="{icone_html}">
+            <link rel="icon" type="image/png" sizes="32x32" href="{icone_html}">
+        </head>
+        """, unsafe_allow_html=True)
 
 # --- DESIGN PERSONALIZADO (RESTABELECENDO O BEGE, DOURADO, VERDE E VERMELHO) ---
 st.markdown("""
@@ -48,7 +54,7 @@ st.markdown("""
         background-color: #f4ecd8 !important; 
     }
     
-    /* Customização dos Inputs (Caixas de texto e números) */
+    /* Customização dos Inputs */
     div[data-testid="stWidgetLabel"] p {
         color: #002b5b !important;
         font-weight: bold !important;
@@ -68,7 +74,7 @@ st.markdown("""
         box-shadow: 0 6px 15px rgba(0,0,0,0.05) !important;
     }
     
-    /* BOTÃO VERDE: CALCULAR E GUARDAR */
+    /* BOTÃO VERDE: ADICIONAR */
     div.stButton > button:first-child {
         width: 100%;
         background-color: #27ae60 !important;
@@ -79,12 +85,9 @@ st.markdown("""
         font-size: 1.05rem !important;
         border: none !important;
         box-shadow: 0 4px 6px rgba(39,174,96,0.2);
-        transition: all 0.2s ease;
     }
     div.stButton > button:first-child:hover { 
         background-color: #1e7e43 !important;
-        box-shadow: 0 4px 12px rgba(39,174,96,0.4);
-        transform: translateY(-1px);
     }
     
     /* BOTÃO VERMELHO: CONFIRMAR ELIMINAÇÃO */
@@ -99,12 +102,11 @@ st.markdown("""
     }
     div[data-testid="stExpander"] button:hover {
         background-color: #a93226 !important;
-        color: white !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# Cabeçalho Institucional (Azul Escuro e Ouro)
+# Cabeçalho Institucional
 st.markdown("""
     <div style='background-color: #002b5b; padding: 25px; border-radius: 12px; margin-bottom: 25px; border-bottom: 6px solid #cfa134; box-shadow: 0 4px 10px rgba(0,0,0,0.1);'>
         <h1 style='color: #f4ecd8; margin: 0; font-family: \"Helvetica Neue\", sans-serif; font-weight: 700; text-align: center; letter-spacing: 1px;'>GESTÃO DE MOLDES: GESSO & CERA</h1>
@@ -164,7 +166,6 @@ if submetido:
 with col2:
     st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px;'>📊 Histórico de Produção</h3>", unsafe_allow_html=True)
     
-    # Executa a busca de dados de forma isolada e segura
     linhas = []
     conexao_ok = False
     try:
@@ -199,16 +200,3 @@ with col2:
             st.info("A base de dados está vazia. Adicione o seu primeiro molde à esquerda.")
     else:
         st.error("Não foi possível estabelecer ligação com a nuvem.")
-
-    # --- ÁREA SEGREDA PARA FAZER O UPLOAD DO LOGO DA LUNARA ---
-    st.write("---")
-    with st.expander("⚙️ Configurações de Marca (Logótipo Lunara)"):
-        import base64
-        uploaded_file = st.file_uploader("Selecione a imagem do seu logotipo (PNG ou JPG):", type=["png", "jpg", "jpeg"])
-        if uploaded_file is not None:
-            bytes_data = uploaded_file.read()
-            base64_encoded = base64.b64encode(bytes_data).decode("utf-8")
-            with open(LOGO_FILE, "w") as f:
-                f.write(base64_encoded)
-            st.success("Logótipo gravado com sucesso! Atualize a página.")
-            st.rerun()
