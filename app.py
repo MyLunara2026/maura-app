@@ -2,9 +2,15 @@ import streamlit as st
 import pandas as pd
 import requests
 
-# --- CONFIGURAÇÕES TÉCNICAS (SUPABASE) ---
-SUPABASE_URL = "https://bkawgiunbbyukdbjywyx.supabase.co"
-SUPABASE_KEY = "sb_publishable_yCx2VN23E4Ar0YE1r-XTDQ_LoqYi9H9"
+# --- CONFIGURAÇÕES TÉCNICAS (CONECTANDO AOS SECRETS DO STREAMLIT) ---
+try:
+    SUPABASE_URL = st.secrets["SUPABASE_URL"]
+    SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+except:
+    # Caso os secrets ainda estejam a carregar, usa o plano B temporário
+    SUPABASE_URL = "https://bkawgiunbbyukdbjywyx.supabase.co"
+    SUPABASE_KEY = "sb_publishable_yCx2VN23E4Ar0YE1r-XTDQ_LoqYi9H9"
+
 HEADERS = {
     "apikey": SUPABASE_KEY,
     "Authorization": f"Bearer {SUPABASE_KEY}",
@@ -18,10 +24,7 @@ st.set_page_config(page_title="Maura | Produção", layout="wide", page_icon="�
 # CSS Personalizado Avançado para forçar as cores institucionais
 st.markdown("""
     <style>
-    /* Forçar fundo cinza claro na aplicação */
     .stApp { background-color: #f8f9fa; }
-    
-    /* Customização do botão calcular */
     .stButton>button {
         width: 100%;
         background-color: #002b5b !important;
@@ -34,12 +37,10 @@ st.markdown("""
         transition: all 0.3s ease;
     }
     .stButton>button:hover { 
-        background-color: #d4af37 !important; /* Muda para Dourado no Hover */
+        background-color: #d4af37 !important;
         color: #002b5b !important;
         box-shadow: 0 4px 12px rgba(212,175,55,0.4);
     }
-    
-    /* Caixa de formulário branca e flutuante */
     div[data-testid="stForm"] {
         border: none !important;
         border-radius: 15px !important;
@@ -47,15 +48,13 @@ st.markdown("""
         background-color: white !important;
         box-shadow: 0 10px 30px rgba(0,0,0,0.05) !important;
     }
-    
-    /* Ajustes inputs */
     div[data-baseweb="input"] {
         border-radius: 8px !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# Cabeçalho Premium Forçado em HTML/CSS para ignorar o bloqueio
+# Cabeçalho Premium
 st.markdown("""
     <div style='background-color: #002b5b; padding: 25px; border-radius: 12px; margin-bottom: 25px; border-left: 8px solid #d4af37;'>
         <h1 style='color: white; margin: 0; font-family: \"Helvetica Neue\", sans-serif; font-weight: 700;'>💎 Maura — Gestão de Produção</h1>
@@ -63,7 +62,7 @@ st.markdown("""
     </div>
     """, unsafe_allow_html=True)
 
-# Criar duas colunas: uma para o formulário e outra para a lista
+# Criar duas colunas
 col1, col2 = st.columns([1, 1.5], gap="large")
 
 with col1:
@@ -101,11 +100,14 @@ if submetido:
         }
         
         try:
-            requests.post(f"{SUPABASE_URL}/rest/v1/moldes", json=dados_novos, headers=HEADERS)
-            st.success(f"Registo '{molde}' sincronizado com sucesso!")
-            st.rerun()
+            res = requests.post(f"{SUPABASE_URL}/rest/v1/moldes", json=dados_novos, headers=HEADERS)
+            if res.status_code in [200, 201]:
+                st.success(f"Registo '{molde}' sincronizado!")
+                st.rerun()
+            else:
+                st.error(f"Erro ao guardar: Código {res.status_code}")
         except:
-            st.error("Erro ao enviar dados para o servidor do Supabase.")
+            st.error("Erro de conexão ao enviar.")
 
 with col2:
     st.markdown("<h3 style='color: #002b5b; font-family: sans-serif;'>📊 Histórico de Produção</h3>", unsafe_allow_html=True)
@@ -118,35 +120,21 @@ with col2:
                 df_visual = df[["molde", "tipo", "agua", "gesso", "cera", "custo_mat", "valor_final"]]
                 df_visual.columns = ["Molde", "Tipo", "Água", "Gesso", "Cera", "Custo Mat.", "PREÇO FINAL"]
                 
-                # Exibe a tabela profissional ocupando o espaço total
                 st.dataframe(df_visual, use_container_width=True, hide_index=True)
                 
-                # Área de exclusão discreta e segura
                 st.write("")
                 with st.expander("🗑️ Opções de Gestão (Eliminar Registo)"):
                     lista_moldes = list(set([i["molde"] for i in linhas if "molde" in i]))
                     molde_apagar = st.selectbox("Selecione o molde a remover:", lista_moldes)
                     
-                    # Estilo destrutivo inline para o botão de apagar
-                    st.markdown("""
-                        <style>
-                        div.stButton > button[key="btn_apagar"] {
-                            background-color: #ff4b4b !important;
-                            color: white !important;
-                        }
-                        </style>
-                    """, unsafe_allow_html=True)
-                    
                     if st.button("CONFIRMAR ELIMINAÇÃO PERMANENTE"):
                         res_del = requests.delete(f"{SUPABASE_URL}/rest/v1/moldes?molde=eq.{molde_apagar}", headers=HEADERS)
                         if res_del.status_code in [200, 204]:
-                            st.toast(f"'{molde_apagar}' removido com sucesso!")
                             st.rerun()
-                        else:
-                            st.error("Não foi possível eliminar o registo.")
             else:
-                st.info("A base de dados do Supabase está vazia. Crie o seu primeiro molde à esquerda.")
+                st.info("A base de dados está vazia. Adicione o seu primeiro molde à esquerda.")
         else:
-            st.error("Erro de comunicação com o banco de dados.")
+            # Caso o código do status não seja 200, mostra o erro exato que o banco de dados está a devolver
+            st.error(f"O banco de dados recusou o acesso (Erro {response_get.status_code}). Verifique se os Secrets estão bem salvos.")
     except:
-        st.error("Não foi possível carregar os dados do histórico de produção.")
+        st.error("Não foi possível estabelecer ligação com a nuvem.")
