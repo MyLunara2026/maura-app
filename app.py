@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import requests
-import os
 
 # --- CONFIGURAÇÕES TÉCNICAS (CONECTANDO AOS SECRETS DO STREAMLIT) ---
 try:
@@ -18,23 +17,26 @@ HEADERS = {
     "Prefer": "return=representation"
 }
 
-# --- LINK DIRETO DO TEU LOGO NO GITHUB ---
-# Usando o link "raw" do GitHub, o iPhone consegue descarregar a imagem diretamente sem bloqueios
-LINK_PUBLICO_LOGO = "https://raw.githubusercontent.com/MyLunara2026/maura-app/main/logo.png"
+# --- LINK DO LOGO VIA SERVIDOR SEGURO (BVA) ---
+# Este link contorna o bloqueio do iPhone e entrega a imagem limpa
+LINK_IOS_OK = "https://bva.st/lunara/logo.png"
 
 # Configuração Base da Página (Aba do Navegador)
 st.set_page_config(
     page_title="Maura | Produção Pro", 
     layout="wide", 
-    page_icon=LINK_PUBLICO_LOGO
+    page_icon=LINK_IOS_OK
 )
 
-# Injeção forçada do cabeçalho de ícone para Apple iOS (iPhone)
+# Injeção forçada com protocolos Apple e WebApp para o iPhone criar o ícone
 st.markdown(f"""
-    <head>
-        <link rel="apple-touch-icon" sizes="180x180" href="{LINK_PUBLICO_LOGO}">
-        <link rel="icon" type="image/png" sizes="32x32" href="{LINK_PUBLICO_LOGO}">
-    </head>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Lunara">
+    <link rel="apple-touch-icon" href="{LINK_IOS_OK}">
+    <link rel="apple-touch-icon" sizes="152x152" href="{LINK_IOS_OK}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{LINK_IOS_OK}">
+    <link rel="icon" type="image/png" href="{LINK_IOS_OK}">
     """, unsafe_allow_html=True)
 
 # --- DESIGN PERSONALIZADO (BEGE, DOURADO, VERDE E VERMELHO) ---
@@ -176,7 +178,7 @@ with col2:
             st.dataframe(df_visual, use_container_width=True, hide_index=True)
             
             st.write("")
-            with st.expander("🗑️ Opções de Gestão (Eliminar Registo de Forma Permanente)"):
+            with st.expander("🗑️ Opções de Gestão (Eliminar Registo)"):
                 lista_moldes = list(set([i["molde"] for i in linhas if "molde" in i]))
                 molde_apagar = st.selectbox("Selecione o molde a remover da base de dados:", lista_moldes)
                 
