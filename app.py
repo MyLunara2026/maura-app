@@ -15,47 +15,59 @@ HEADERS = {
 # --- CONFIGURAÇÃO DA PÁGINA (ESTÉTICA) ---
 st.set_page_config(page_title="Maura | Produção", layout="wide", page_icon="💎")
 
-# CSS Personalizado para um visual "Premium"
+# CSS Personalizado Avançado para forçar as cores institucionais
 st.markdown("""
     <style>
-    .main { background-color: #f8f9fa; }
+    /* Forçar fundo cinza claro na aplicação */
+    .stApp { background-color: #f8f9fa; }
+    
+    /* Customização do botão calcular */
     .stButton>button {
         width: 100%;
-        background-color: #002b5b;
-        color: white;
-        border-radius: 8px;
+        background-color: #002b5b !important;
+        color: white !important;
+        border-radius: 8px !important;
         height: 3em;
-        font-weight: bold;
-        border: none;
+        font-weight: bold !important;
+        border: none !important;
+        box-shadow: 0 4px 6px rgba(0,43,91,0.2);
+        transition: all 0.3s ease;
     }
-    .stButton>button:hover { background-color: #004080; border: none; color: white; }
+    .stButton>button:hover { 
+        background-color: #d4af37 !important; /* Muda para Dourado no Hover */
+        color: #002b5b !important;
+        box-shadow: 0 4px 12px rgba(212,175,55,0.4);
+    }
+    
+    /* Caixa de formulário branca e flutuante */
     div[data-testid="stForm"] {
-        border: 1px solid #e0e0e0;
-        border-radius: 15px;
-        padding: 30px;
-        background-color: white;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        border: none !important;
+        border-radius: 15px !important;
+        padding: 30px !important;
+        background-color: white !important;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05) !important;
     }
-    h1 { color: #002b5b; font-family: 'Helvetica Neue', sans-serif; }
-    .metric-card {
-        background-color: white;
-        padding: 15px;
-        border-radius: 10px;
-        border-left: 5px solid #002b5b;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    
+    /* Ajustes inputs */
+    div[data-baseweb="input"] {
+        border-radius: 8px !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# Cabeçalho
-st.title("💎 Maura — Gestão de Produção")
-st.write("Calculadora de Custos e Receitas Sincronizada em Tempo Real.")
+# Cabeçalho Premium Forçado em HTML/CSS para ignorar o bloqueio
+st.markdown("""
+    <div style='background-color: #002b5b; padding: 25px; border-radius: 12px; margin-bottom: 25px; border-left: 8px solid #d4af37;'>
+        <h1 style='color: white; margin: 0; font-family: \"Helvetica Neue\", sans-serif; font-weight: 700;'>💎 Maura — Gestão de Produção</h1>
+        <p style='color: #d4af37; margin: 5px 0 0 0; font-size: 1.1rem; font-weight: 500;'>Calculadora de Custos e Receitas Sincronizada em Tempo Real</p>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Criar duas colunas: uma para o formulário e outra para a lista
 col1, col2 = st.columns([1, 1.5], gap="large")
 
 with col1:
-    st.subheader("Novo Registo")
+    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif;'>📋 Novo Registo</h3>", unsafe_allow_html=True)
     with st.form("formulario_molde", clear_on_submit=True):
         molde = st.text_input("Nome do Molde", placeholder="Ex: Jarra Tulipa")
         v_total = st.number_input("Volume Total (ml)", min_value=0.0, step=10.0)
@@ -88,12 +100,15 @@ if submetido:
             "custo_mat": f"{custo_total_mat:.2f}€", "valor_final": f"{valor_final:.2f}€"
         }
         
-        requests.post(f"{SUPABASE_URL}/rest/v1/moldes", json=dados_novos, headers=HEADERS)
-        st.success(f"Registo '{molde}' sincronizado!")
-        st.rerun()
+        try:
+            requests.post(f"{SUPABASE_URL}/rest/v1/moldes", json=dados_novos, headers=HEADERS)
+            st.success(f"Registo '{molde}' sincronizado com sucesso!")
+            st.rerun()
+        except:
+            st.error("Erro ao enviar dados para o servidor do Supabase.")
 
 with col2:
-    st.subheader("Histórico de Produção")
+    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif;'>📊 Histórico de Produção</h3>", unsafe_allow_html=True)
     try:
         response_get = requests.get(f"{SUPABASE_URL}/rest/v1/moldes?select=*&order=id.desc", headers=HEADERS)
         if response_get.status_code == 200:
@@ -103,15 +118,35 @@ with col2:
                 df_visual = df[["molde", "tipo", "agua", "gesso", "cera", "custo_mat", "valor_final"]]
                 df_visual.columns = ["Molde", "Tipo", "Água", "Gesso", "Cera", "Custo Mat.", "PREÇO FINAL"]
                 
+                # Exibe a tabela profissional ocupando o espaço total
                 st.dataframe(df_visual, use_container_width=True, hide_index=True)
                 
-                # Botão discreto para apagar
-                with st.expander("🗑️ Eliminar Registos"):
-                    molde_apagar = st.selectbox("Escolha o molde para remover", [i["molde"] for i in linhas])
-                    if st.button("CONFIRMAR ELIMINAÇÃO"):
-                        requests.delete(f"{SUPABASE_URL}/rest/v1/moldes?molde=eq.{molde_apagar}", headers=HEADERS)
-                        st.rerun()
+                # Área de exclusão discreta e segura
+                st.write("")
+                with st.expander("🗑️ Opções de Gestão (Eliminar Registo)"):
+                    lista_moldes = list(set([i["molde"] for i in linhas if "molde" in i]))
+                    molde_apagar = st.selectbox("Selecione o molde a remover:", lista_moldes)
+                    
+                    # Estilo destrutivo inline para o botão de apagar
+                    st.markdown("""
+                        <style>
+                        div.stButton > button[key="btn_apagar"] {
+                            background-color: #ff4b4b !important;
+                            color: white !important;
+                        }
+                        </style>
+                    """, unsafe_allow_html=True)
+                    
+                    if st.button("CONFIRMAR ELIMINAÇÃO PERMANENTE"):
+                        res_del = requests.delete(f"{SUPABASE_URL}/rest/v1/moldes?molde=eq.{molde_apagar}", headers=HEADERS)
+                        if res_del.status_code in [200, 204]:
+                            st.toast(f"'{molde_apagar}' removido com sucesso!")
+                            st.rerun()
+                        else:
+                            st.error("Não foi possível eliminar o registo.")
             else:
-                st.info("A base de dados está vazia. Comece por adicionar um molde.")
+                st.info("A base de dados do Supabase está vazia. Crie o seu primeiro molde à esquerda.")
+        else:
+            st.error("Erro de comunicação com o banco de dados.")
     except:
-        st.error("Erro ao carregar dados da nuvem.")
+        st.error("Não foi possível carregar os dados do histórico de produção.")
