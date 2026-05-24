@@ -20,6 +20,17 @@ HEADERS = {
 # --- CONFIGURAÇÃO DA PÁGINA (ESTÉTICA) ---
 st.set_page_config(page_title="Maura | Produção Pro", layout="wide", page_icon="💎")
 
+# --- CONFIGURAÇÃO DO ÍCONE PARA O ECRÃ INICIAL DO IPHONE ---
+# Ícone temporário em alta resolução (Link público seguro)
+LINK_LOGO_TEMPORARIO = "https://cdn-icons-png.flaticon.com/512/2885/2885994.png"
+
+st.markdown(f"""
+    <head>
+        <link rel="apple-touch-icon" sizes="180x180" href="{LINK_LOGO_TEMPORARIO}">
+        <link rel="icon" type="image/png" sizes="32x32" href="{LINK_LOGO_TEMPORARIO}">
+    </head>
+    """, unsafe_allow_html=True)
+
 # --- DESIGN PERSONALIZADO (CORES DA TUA APLICAÇÃO: BEGE, DOURADO, VERDE E VERMELHO) ---
 st.markdown("""
     <style>
@@ -67,13 +78,15 @@ st.markdown("""
         transform: translateY(-1px);
     }
     
-    /* BOTÃO VERMELHO: CONFIRMAR ELIMINAÇÃO (Dentro do Expander) */
+    /* BOTÃO VERMELHO: CONFIRMAR ELIMINAÇÃO */
     div[data-testid="stExpander"] button {
         background-color: #c0392b !important;
         color: white !important;
         border-radius: 6px !important;
         font-weight: bold !important;
         border: none !important;
+        width: 100%;
+        height: 3em;
     }
     div[data-testid="stExpander"] button:hover {
         background-color: #a93226 !important;
@@ -111,7 +124,7 @@ with col1:
         extra = st.number_input("Material Extra (€)", min_value=0.0, value=0.50, step=0.10)
         mult = st.number_input("Multiplicador Mão de Obra (x)", min_value=1.0, value=3.0, step=0.5)
         
-        submetido = st.form_submit_button("ADICIONAR")
+        submetido = st.form_submit_button("ADICIONAR & GUARDAR NA NUVEM")
 
 if submetido:
     if molde and v_total > 0:
@@ -140,31 +153,40 @@ if submetido:
             st.rerun()
 
 with col2:
-    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px;'>📊 Histórico de Produção</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px;'>📊 Histórico de Production</h3>", unsafe_allow_html=True)
+    
+    # Executa a busca de dados de forma isolada e segura
+    linhas = []
+    conexao_ok = False
     try:
         response_get = requests.get(f"{SUPABASE_URL}/rest/v1/moldes?select=*&order=id.desc", headers=HEADERS)
         if response_get.status_code == 200:
             linhas = response_get.json()
-            if linhas:
-                df = pd.DataFrame(linhas)
-                df_visual = df[["molde", "tipo", "agua", "gesso", "cera", "custo_mat", "valor_final"]]
-                df_visual.columns = ["Molde", "Tipo", "Água", "Gesso", "Cera", "Custo Mat.", "PREÇO FINAL"]
+            conexao_ok = True
+    except:
+        conexao_ok = False
+
+    if conexao_ok:
+        if linhas:
+            df = pd.DataFrame(linhas)
+            df_visual = df[["molde", "tipo", "agua", "gesso", "cera", "custo_mat", "valor_final"]]
+            df_visual.columns = ["Molde", "Tipo", "Água", "Gesso", "Cera", "Custo Mat.", "PREÇO FINAL"]
+            
+            st.dataframe(df_visual, use_container_width=True, hide_index=True)
+            
+            st.write("")
+            with st.expander("🗑️ Opções de Gestão (Eliminar Registo de Forma Permanente)"):
+                lista_moldes = list(set([i["molde"] for i in linhas if "molde" in i]))
+                molde_apagar = st.selectbox("Selecione o molde a remover da base de dados:", lista_moldes)
                 
-                # Exibe a tabela adaptada ao tamanho da coluna
-                st.dataframe(df_visual, use_container_width=True, hide_index=True)
-                
-                st.write("")
-                with st.expander("🗑️ Opções de Gestão (Eliminar Registo de Forma Permanente)"):
-                    lista_moldes = list(set([i["molde"] for i in linhas if "molde" in i]))
-                    molde_apagar = st.selectbox("Selecione o molde a remover da base de dados:", lista_moldes)
-                    
-                    if st.button("ELIMINAR REGISTO SELECIONADO"):
+                if st.button("ELIMINAR REGISTO SELECIONADO"):
+                    try:
                         res_del = requests.delete(f"{SUPABASE_URL}/rest/v1/moldes?molde=eq.{molde_apagar}", headers=HEADERS)
                         if res_del.status_code in [200, 204]:
                             st.rerun()
-            else:
-                st.info("A base de dados está vazia. Adicione o seu primeiro molde à esquerda.")
+                    except:
+                        st.rerun()
         else:
-            st.error(f"O banco de dados recusou o acesso (Erro {response_get.status_code}).")
-    except:
+            st.info("A base de dados está vazia. Adicione o seu primeiro molde à esquerda.")
+    else:
         st.error("Não foi possível estabelecer ligação com a nuvem.")
