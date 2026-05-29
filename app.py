@@ -22,25 +22,56 @@ st.set_page_config(page_title="Maura | Produção Pro", layout="wide", page_icon
 
 # --- DESIGN PERSONALIZADO (BEGE, DOURADO, VERDE, AZUL E VERMELHO) ---
 st.markdown("""
-    <style>
-    .stApp { background-color: #f4ecd8 !important; }
-    div[data-testid="stWidgetLabel"] p { color: #002b5b !important; font-weight: bold !important; }
-    div[data-baseweb="input"], div[data-baseweb="number-input"] { border: 2px solid #cfa134 !important; border-radius: 6px !important; background-color: white !important; }
-    div[data-testid="stForm"] { border: 2px solid #002b5b !important; border-radius: 12px !important; padding: 25px !important; background-color: #fdfbf7 !important; box-shadow: 0 6px 15px rgba(0,0,0,0.05) !important; }
-    
-    /* Botão ADICIONAR (Verde) */
-    div.stButton > button[key="btn_adicionar"] { width: 100%; background-color: #27ae60 !important; color: white !important; border-radius: 6px !important; height: 3.2em; font-weight: bold !important; border: none !important; }
-    
-    /* Botão GUARDAR EDIÇÃO (Azul) */
-    div.stButton > button[key="btn_guardar_edicao"] { width: 100%; background-color: #2980b9 !important; color: white !important; border-radius: 6px !important; height: 3.2em; font-weight: bold !important; border: none !important; }
-    
-    /* Botão ELIMINAR (Vermelho) */
-    div[data-testid="stExpander"] button { background-color: #c0392b !important; color: white !important; border-radius: 6px !important; font-weight: bold !important; border: none !important; width: 100%; height: 3em; }
-    </style>
-    """, unsafe_allow_html=True)
+<style>
+.stApp { background-color: #f4ecd8 !important; }
+div[data-testid="stWidgetLabel"] p { color: #002b5b !important; font-weight: bold !important; }
+div[data-baseweb="input"], div[data-baseweb="number-input"] { border: 2px solid #cfa134 !important; border-radius: 6px !important; background-color: white !important; }
+div[data-testid="stForm"] { border: 2px solid #002b5b !important; border-radius: 12px !important; padding: 25px !important; background-color: #fdfbf7 !important; box-shadow: 0 6px 15px rgba(0,0,0,0.05) !important; }
+
+/* Botão ADICIONAR (Verde) */
+div.stButton > button[key="btn_adicionar"] { width: 100%; background-color: #27ae60 !important; color: white !important; border-radius: 6px !important; height: 3.2em; font-weight: bold !important; border: none !important; }
+
+/* Botão GUARDAR EDIÇÃO (Azul) */
+div.stButton > button[key="btn_guardar_edicao"] { width: 100%; background-color: #2980b9 !important; color: white !important; border-radius: 6px !important; height: 3.2em; font-weight: bold !important; border: none !important; }
+
+/* Botão ELIMINAR (Vermelho) */
+div[data-testid="stExpander"] button { background-color: #c0392b !important; color: white !important; border-radius: 6px !important; font-weight: bold !important; border: none !important; width: 100%; height: 3em; }
+</style>
+""", unsafe_allow_html=True)
 
 # Cabeçalho Institucional
 st.markdown("""
-    <div style='background-color: #002b5b; padding: 25px; border-radius: 12px; margin-bottom: 25px; border-bottom: 6px solid #cfa134; box-shadow: 0 4px 10px rgba(0,0,0,0.1);'>
-        <h1 style='color: #f4ecd8; margin: 0; font-family: \"Helvetica Neue\", sans-serif; font-weight: 700; text-align: center;'>GESTÃO DE MOLDES: GESSO & CERA</h1>
-        <p style='color: #cfa134; margin: 6px 0 0 0; font-size: 1.1rem; font-weight: 50
+<div style='background-color: #002b5b; padding: 25px; border-radius: 12px; margin-bottom: 25px; border-bottom: 6px solid #cfa134; box-shadow: 0 4px 10px rgba(0,0,0,0.1);'>
+    <h1 style='color: #f4ecd8; margin: 0; font-family: "Helvetica Neue", sans-serif; font-weight: 700; text-align: center;'>GESTÃO DE MOLDES: GESSO & CERA</h1>
+    <p style='color: #cfa134; margin: 6px 0 0 0; font-size: 1.1rem; font-weight: 500; text-align: center;'>Calculadora de Custos e Receitas Sincronizada em Tempo Real</p>
+</div>
+""", unsafe_allow_html=True)
+
+# --- SESSÃO DE DADOS (Puxar da Nuvem) ---
+linhas = []
+conexao_ok = False
+try:
+    response_get = requests.get(f"{SUPABASE_URL}/rest/v1/moldes?select=*&order=id.desc", headers=HEADERS)
+    if response_get.status_code == 200:
+        linhas = response_get.json()
+        conexao_ok = True
+except:
+    conexao_ok = False
+
+# Criar as duas colunas principais
+col1, col2 = st.columns([1, 1.4], gap="large")
+
+with col1:
+    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #cfa134; padding-left: 10px;'>📋 Formulário de Trabalho</h3>", unsafe_allow_html=True)
+    
+    with st.form("formulario_molde", clear_on_submit=True):
+        molde = st.text_input("Nome do Molde", placeholder="Ex: Jarra Tulipa")
+        
+        tipo_producao = st.radio("Selecione o Material:", ["Gesso", "Cera", "Gesso + Cera"], horizontal=True)
+        
+        v_total = st.number_input("Volume Total (ml)", min_value=0.0, step=10.0, value=None, placeholder="Introduza o volume total...")
+        
+        gramas_cera = 0.0
+        if tipo_producao in ["Cera", "Gesso + Cera"]:
+            gramas_cera_input = st.number_input("Peso da Cera (g)", min_value=0.0, step=5.0, value=None, placeholder="Introduza as gramas de cera...")
+            if gram
