@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import requests
@@ -144,4 +143,30 @@ with col2:
                         novo_tipo = st.selectbox("Mudar Tipo", ["Gesso", "Cera", "Gesso + Cera"], index=["Gesso", "Cera", "Gesso + Cera"].index(dados_atuais["tipo"]))
                     with c_ed2:
                         novo_custo = st.text_input("Corrigir Custo Mat. (€)", value=dados_atuais["custo_mat"])
-                        novo_preco = st.text_input("Corrig
+                        novo_preco = st.text_input("Corrigir Preço Final (€)", value=dados_atuais["valor_final"])
+                    
+                    if st.button("GUARDAR ALTERAÇÕES", key="btn_guardar_edicao"):
+                        dados_atualizados = {"molde": novo_nome, "tipo": novo_tipo, "custo_mat": novo_custo, "valor_final": novo_preco}
+                        try:
+                            res_put = requests.patch(f"{SUPABASE_URL}/rest/v1/moldes?id=eq.{dados_atuais['id']}", json=dados_atualizados, headers=HEADERS)
+                            if res_put.status_code in [200, 204]:
+                                st.success("Atualizado com sucesso!")
+                                st.rerun()
+                        except:
+                            st.rerun()
+            
+            # --- PAINEL DE ELIMINAÇÃO ---
+            with st.expander("🗑️ Opções de Gestão: Eliminar Registos"):
+                lista_moldes_del = list(set([i["molde"] for i in linhas if "molde" in i]))
+                molde_apagar = st.selectbox("Selecione o molde a remover:", lista_moldes_del)
+                if st.button("ELIMINAR REGISTO SELECIONADO"):
+                    try:
+                        res_del = requests.delete(f"{SUPABASE_URL}/rest/v1/moldes?molde=eq.{molde_apagar}", headers=HEADERS)
+                        if res_del.status_code in [200, 204]:
+                            st.rerun()
+                    except:
+                        st.rerun()
+        else:
+            st.info("A base de dados está vazia.")
+    else:
+        st.error("Não foi possível ligar à nuvem.")
