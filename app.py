@@ -43,7 +43,7 @@ div[data-testid="stExpander"] button { background-color: #c0392b !important; col
 st.markdown("""
 <div style='background-color: #002b5b; padding: 25px; border-radius: 12px; margin-bottom: 25px; border-bottom: 6px solid #cfa134; box-shadow: 0 4px 10px rgba(0,0,0,0.1);'>
     <h1 style='color: #f4ecd8; margin: 0; font-family: "Helvetica Neue", sans-serif; font-weight: 700; text-align: center;'>GESTÃO DE MOLDES: GESSO & CERA</h1>
-    <p style='color: #cfa134; margin: 6px 0 0 0; font-size: 1.1rem; font-weight: 500; text-align: center;'>Calculadora de Custos e Receitas Sincronizada em Tempo Real</p>
+    <p style='color: #cfa134; margin: 6px 0 0 0; font-size: 1.1rem; font-weight: 500; text-align: center;'>Calculadora Inteligente com Dosagem de Cera Automática</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -67,17 +67,14 @@ with col1:
     with st.form("formulario_molde", clear_on_submit=True):
         molde = st.text_input("Nome do Molde", placeholder="Ex: Jarra Tulipa")
         
-        # Os 3 botões redondos horizontais que pediste
         tipo_producao = st.radio("Selecione o Material:", ["Gesso", "Cera", "Gesso + Cera"], horizontal=True)
         
-        # Caixas numéricas limpas sem o "0.00" inicial
         v_total = st.number_input("Volume Total (ml)", min_value=0.0, step=10.0, value=None, placeholder="Introduza o volume total...")
         
-        gramas_cera = 0.0
+        # Opções inspiradas no link: só aparecem se envolver Cera!
+        recipiente = "Não se aplica"
         if tipo_producao in ["Cera", "Gesso + Cera"]:
-            gramas_cera_input = st.number_input("Peso da Cera (g)", min_value=0.0, step=5.0, value=None, placeholder="Introduza as gramas de cera...")
-            if gramas_cera_input is not None:
-                gramas_cera = gramas_cera_input
+            recipiente = st.radio("Tipo de Recipiente para a Cera:", ["Molde", "Sem Tampa"], horizontal=True)
             
         st.write("---")
         extra = st.number_input("Material Extra (€)", min_value=0.0, value=0.50, step=0.10)
@@ -87,6 +84,15 @@ with col1:
 
 if submetido:
     if molde and v_total is not None and v_total > 0:
+        # 1. CÁLCULO AUTOMÁTICO DA CERA (Baseado na densidade da Lunae Academy)
+        gramas_cera = 0.0
+        if tipo_producao in ["Cera", "Gesso + Cera"]:
+            if recipiente == "Molde":
+                gramas_cera = v_total * 0.89
+            elif recipiente == "Sem Tampa":
+                gramas_cera = v_total * 0.86
+
+        # 2. CÁLCULO DO GESSO E CUSTOS
         if tipo_producao == "Cera":
             agua, gesso, custo_gesso = 0.0, 0.0, 0.0
             custo_cera = (gramas_cera * 17.50) / 2000
@@ -95,7 +101,7 @@ if submetido:
             gesso = agua * 2.5
             custo_gesso = (gesso * 7.49) / 1000
             custo_cera = 0.0
-        else:
+        else: # Gesso + Cera
             agua = v_total / 2
             gesso = agua * 2.5
             custo_gesso = (gesso * 7.49) / 1000
@@ -104,15 +110,18 @@ if submetido:
         custo_total_mat = custo_gesso + custo_cera + extra
         valor_final = custo_total_mat * mult
         
+        # Guardamos a informação do recipiente junto ao nome para saberes o que escolheste
+        nome_final_molde = f"{molde} ({recipiente})" if recipiente != "Não se aplica" else molde
+        
         dados_novos = {
-            "molde": molde, "tipo": tipo_producao, 
+            "molde": nome_final_molde, "tipo": tipo_producao, 
             "agua": f"{agua:.0f}g", "gesso": f"{gesso:.0f}g", "cera": f"{gramas_cera:.0f}g", 
             "custo_mat": f"{custo_total_mat:.2f}€", "valor_final": f"{valor_final:.2f}€"
         }
         try:
             res = requests.post(f"{SUPABASE_URL}/rest/v1/moldes", json=dados_novos, headers=HEADERS)
             if res.status_code in [200, 201, 204]:
-                st.success(f"Molde '{molde}' adicionado!")
+                st.success(f"Molde '{molde}' adicionado com sucesso!")
                 st.rerun()
         except:
             st.rerun()
@@ -120,13 +129,13 @@ if submetido:
         st.warning("Preencha o Nome do Molde e o Volume antes de avançar.")
 
 with col2:
-    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px;'>📊 Histórico de Production</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px;'>📊 Histórico de Produção</h3>", unsafe_allow_html=True)
     
     if conexao_ok:
         if linhas:
             df = pd.DataFrame(linhas)
             df_visual = df[["molde", "tipo", "agua", "gesso", "cera", "custo_mat", "valor_final"]]
-            df_visual.columns = ["Molde", "Tipo", "Água", "Gesso", "Cera", "Custo Mat.", "PREÇO FINAL"]
+            df_visual.columns = ["Molde (Recipiente)", "Tipo", "Água", "Gesso", "Cera Calculada", "Custo Mat.", "PREÇO FINAL"]
             st.dataframe(df_visual, use_container_width=True, hide_index=True)
             
             st.write("")
