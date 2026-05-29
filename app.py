@@ -66,12 +66,9 @@ with col1:
     
     with st.form("formulario_molde", clear_on_submit=True):
         molde = st.text_input("Nome do Molde", placeholder="Ex: Jarra Tulipa")
-        
         tipo_producao = st.radio("Selecione o Material:", ["Gesso", "Cera", "Gesso + Cera"], horizontal=True)
-        
         v_total = st.number_input("Volume Total (ml)", min_value=0.0, step=10.0, value=None, placeholder="Introduza o volume total...")
         
-        # Opções inspiradas no link: só aparecem se envolver Cera!
         recipiente = "Não se aplica"
         if tipo_producao in ["Cera", "Gesso + Cera"]:
             recipiente = st.radio("Tipo de Recipiente para a Cera:", ["Molde", "Sem Tampa"], horizontal=True)
@@ -84,15 +81,10 @@ with col1:
 
 if submetido:
     if molde and v_total is not None and v_total > 0:
-        # 1. CÁLCULO AUTOMÁTICO DA CERA (Baseado na densidade da Lunae Academy)
         gramas_cera = 0.0
         if tipo_producao in ["Cera", "Gesso + Cera"]:
-            if recipiente == "Molde":
-                gramas_cera = v_total * 0.89
-            elif recipiente == "Sem Tampa":
-                gramas_cera = v_total * 0.86
+            gramas_cera = v_total * 0.89 if recipiente == "Molde" else v_total * 0.86
 
-        # 2. CÁLCULO DO GESSO E CUSTOS
         if tipo_producao == "Cera":
             agua, gesso, custo_gesso = 0.0, 0.0, 0.0
             custo_cera = (gramas_cera * 17.50) / 2000
@@ -101,7 +93,7 @@ if submetido:
             gesso = agua * 2.5
             custo_gesso = (gesso * 7.49) / 1000
             custo_cera = 0.0
-        else: # Gesso + Cera
+        else:
             agua = v_total / 2
             gesso = agua * 2.5
             custo_gesso = (gesso * 7.49) / 1000
@@ -110,7 +102,6 @@ if submetido:
         custo_total_mat = custo_gesso + custo_cera + extra
         valor_final = custo_total_mat * mult
         
-        # Guardamos a informação do recipiente junto ao nome para saberes o que escolheste
         nome_final_molde = f"{molde} ({recipiente})" if recipiente != "Não se aplica" else molde
         
         dados_novos = {
@@ -139,7 +130,7 @@ with col2:
             st.dataframe(df_visual, use_container_width=True, hide_index=True)
             
             st.write("")
-            # --- PAINEL DE EDIÇÃO ---
+            # --- PAINEL DE EDIÇÃO ATUALIZADO (COM VOLUME ML) ---
             with st.expander("📝 Opções de Gestão: Editar Dados Existentes"):
                 lista_moldes_edit = list(set([i["molde"] for i in linhas if "molde" in i]))
                 molde_escolhido = st.selectbox("Selecione o molde que quer alterar:", lista_moldes_edit)
@@ -150,16 +141,48 @@ with col2:
                     with c_ed1:
                         novo_nome = st.text_input("Corrigir Nome do Molde", value=dados_atuais["molde"])
                         novo_tipo = st.selectbox("Mudar Tipo", ["Gesso", "Cera", "Gesso + Cera"], index=["Gesso", "Cera", "Gesso + Cera"].index(dados_atuais["tipo"]))
+                        # NOVA CAIXA ADICIONADA AQUI:
+                        novo_vol = st.number_input("Corrigir Volume Total (ml)", min_value=1.0, step=10.0, value=200.0)
                     with c_ed2:
-                        novo_custo = st.text_input("Corrigir Custo Mat. (€)", value=dados_atuais["custo_mat"])
-                        novo_preco = st.text_input("Corrigir Preço Final (€)", value=dados_atuais["valor_final"])
+                        # Identifica se é molde ou sem tampa pelo nome antigo para manter a lógicaLunae
+                        tipo_rec = "Sem Tampa" if "Sem Tampa" in novo_nome else "Molde"
+                        
+                        # Recalcula tudo em tempo real para a edição com base no novo volume digitado
+                        g_cera_ed = novo_vol * 0.89 if tipo_rec == "Molde" else novo_vol * 0.86
+                        
+                        if novo_tipo == "Cera":
+                            ag_ed, ge_ed, c_ge_ed = 0.0, 0.0, 0.0
+                            c_ce_ed = (g_cera_ed * 17.50) / 2000
+                        elif novo_tipo == "Gesso":
+                            ag_ed = novo_vol / 2
+                            ge_ed = ag_ed * 2.5
+                            c_ge_ed = (ge_ed * 7.49) / 1000
+                            g_cera_ed, c_ce_ed = 0.0, 0.0
+                        else:
+                            ag_ed = novo_vol / 2
+                            ge_ed = ag_ed * 2.5
+                            c_ge_ed = (ge_ed * 7.49) / 1000
+                            c_ce_ed = (g_cera_ed * 17.50) / 2000
+                        
+                        c_total_ed = c_ge_ed + c_ce_ed + 0.50
+                        v_final_ed = c_total_ed * 3.0
+                        
+                        st.info(f"Novos Valores Automáticos:\n- Custo: {c_total_ed:.2f}€\n- Preço: {v_final_ed:.2f}€")
                     
                     if st.button("GUARDAR ALTERAÇÕES", key="btn_guardar_edicao"):
-                        dados_atualizados = {"molde": novo_nome, "tipo": novo_tipo, "custo_mat": novo_custo, "valor_final": novo_preco}
+                        dados_atualizados = {
+                            "molde": novo_nome,
+                            "tipo": novo_tipo,
+                            "agua": f"{ag_ed:.0f}g",
+                            "gesso": f"{ge_ed:.0f}g",
+                            "cera": f"{g_cera_ed:.0f}g",
+                            "custo_mat": f"{c_total_ed:.2f}€",
+                            "valor_final": f"{v_final_ed:.2f}€"
+                        }
                         try:
                             res_put = requests.patch(f"{SUPABASE_URL}/rest/v1/moldes?id=eq.{dados_atuais['id']}", json=dados_atualizados, headers=HEADERS)
                             if res_put.status_code in [200, 204]:
-                                st.success("Atualizado com sucesso!")
+                                st.success("Atualizado com sucesso com os novos cálculos!")
                                 st.rerun()
                         except:
                             st.rerun()
