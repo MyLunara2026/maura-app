@@ -17,37 +17,15 @@ HEADERS = {
     "Prefer": "return=representation"
 }
 
-# --- LINK DO LOGO VIA SERVIDOR SEGURO (BVA) ---
-# Este link contorna o bloqueio do iPhone e entrega a imagem limpa
-LINK_IOS_OK = "https://bva.st/lunara/logo.png"
-
-# Configuração Base da Página (Aba do Navegador)
-st.set_page_config(
-    page_title="Maura | Produção Pro", 
-    layout="wide", 
-    page_icon=LINK_IOS_OK
-)
-
-# Injeção forçada com protocolos Apple e WebApp para o iPhone criar o ícone
-st.markdown(f"""
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Lunara">
-    <link rel="apple-touch-icon" href="{LINK_IOS_OK}">
-    <link rel="apple-touch-icon" sizes="152x152" href="{LINK_IOS_OK}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{LINK_IOS_OK}">
-    <link rel="icon" type="image/png" href="{LINK_IOS_OK}">
-    """, unsafe_allow_html=True)
+# --- CONFIGURAÇÃO DA PÁGINA (ESTÉTICA PC) ---
+st.set_page_config(page_title="Maura | Produção Pro", layout="wide", page_icon="💎")
 
 # --- DESIGN PERSONALIZADO (BEGE, DOURADO, VERDE E VERMELHO) ---
 st.markdown("""
     <style>
-    /* Fundo da aplicação em Bege Suave */
     .stApp { 
         background-color: #f4ecd8 !important; 
     }
-    
-    /* Customização dos Inputs */
     div[data-testid="stWidgetLabel"] p {
         color: #002b5b !important;
         font-weight: bold !important;
@@ -57,8 +35,6 @@ st.markdown("""
         border-radius: 6px !important;
         background-color: white !important;
     }
-    
-    /* Bloco do Formulário Esquerdo */
     div[data-testid="stForm"] {
         border: 2px solid #002b5b !important;
         border-radius: 12px !important;
@@ -66,8 +42,6 @@ st.markdown("""
         background-color: #fdfbf7 !important;
         box-shadow: 0 6px 15px rgba(0,0,0,0.05) !important;
     }
-    
-    /* BOTÃO VERDE: ADICIONAR */
     div.stButton > button:first-child {
         width: 100%;
         background-color: #27ae60 !important;
@@ -82,8 +56,6 @@ st.markdown("""
     div.stButton > button:first-child:hover { 
         background-color: #1e7e43 !important;
     }
-    
-    /* BOTÃO VERMELHO: CONFIRMAR ELIMINAÇÃO */
     div[data-testid="stExpander"] button {
         background-color: #c0392b !important;
         color: white !important;
@@ -107,22 +79,26 @@ st.markdown("""
     </div>
     """, unsafe_allow_html=True)
 
-# Criar as duas colunas principais
 col1, col2 = st.columns([1, 1.4], gap="large")
 
 with col1:
     st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #cfa134; padding-left: 10px;'>📋 Novo Registo</h3>", unsafe_allow_html=True)
+    
     with st.form("formulario_molde", clear_on_submit=True):
         molde = st.text_input("Nome do Molde", placeholder="Ex: Jarra Tulipa")
-        v_total = st.number_input("Volume Total (ml)", min_value=0.0, step=10.0)
         
-        c1, c2 = st.columns(2)
-        with c1:
-            st.write("")
-            st.write("")
-            leva_cera = st.checkbox("Incluir Cera?")
-        with c2:
-            gramas_cera = st.number_input("Cera (g)", min_value=0.0, step=5.0)
+        # 1. Seleção clara do tipo de produção
+        tipo_producao = st.radio("Tipo de Trabalho:", ["Apenas Gesso", "Gesso + Cera"], horizontal=True)
+        
+        # 2. Volume Total a começar em branco (sem zeros)
+        v_total = st.number_input("Volume Total (ml)", min_value=0.0, step=10.0, value=None, placeholder="Introduza o volume...")
+        
+        # 3. Mostrar campo da cera apenas se "Gesso + Cera" estiver ativo
+        gramas_cera = 0.0
+        if tipo_producao == "Gesso + Cera":
+            gramas_cera_input = st.number_input("Peso da Cera (g)", min_value=0.0, step=5.0, value=None, placeholder="Introduza as gramas de cera...")
+            if gramas_cera_input is not None:
+                gramas_cera = gramas_cera_input
             
         st.write("---")
         extra = st.number_input("Material Extra (€)", min_value=0.0, value=0.50, step=0.10)
@@ -131,19 +107,24 @@ with col1:
         submetido = st.form_submit_button("ADICIONAR")
 
 if submetido:
-    if molde and v_total > 0:
+    # Validação para garantir que os campos obrigatórios foram preenchidos
+    if molde and v_total is not None and v_total > 0:
         agua = v_total / 2
         gesso = agua * 2.5
+        
         custo_gesso = (gesso * 7.49) / 1000
-        custo_cera = (gramas_cera * 17.50) / 2000 if leva_cera else 0.0
+        custo_cera = (gramas_cera * 17.50) / 2000 if tipo_producao == "Gesso + Cera" else 0.0
         custo_total_mat = custo_gesso + custo_cera + extra
         valor_final = custo_total_mat * mult
-        tipo = "Gesso + Cera" if leva_cera else "Gesso"
         
         dados_novos = {
-            "molde": molde, "tipo": tipo, "agua": f"{agua}g", 
-            "gesso": f"{gesso}g", "cera": f"{gramas_cera}g", 
-            "custo_mat": f"{custo_total_mat:.2f}€", "valor_final": f"{valor_final:.2f}€"
+            "molde": molde, 
+            "tipo": tipo_producao, 
+            "agua": f"{agua:.0f}g", 
+            "gesso": f"{gesso:.0f}g", 
+            "cera": f"{gramas_cera:.0f}g" if tipo_producao == "Gesso + Cera" else "0g", 
+            "custo_mat": f"{custo_total_mat:.2f}€", 
+            "valor_final": f"{valor_final:.2f}€"
         }
         
         try:
@@ -155,9 +136,11 @@ if submetido:
                 st.error(f"Erro ao guardar no servidor (Código {res.status_code})")
         except:
             st.rerun()
+    else:
+        st.warning("Por favor, preencha o Nome do Molde e o Volume Total antes de submeter.")
 
 with col2:
-    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px;'>📊 Histórico de Produção</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px;'>📊 Histórico de Production</h3>", unsafe_allow_html=True)
     
     linhas = []
     conexao_ok = False
@@ -178,7 +161,7 @@ with col2:
             st.dataframe(df_visual, use_container_width=True, hide_index=True)
             
             st.write("")
-            with st.expander("🗑️ Opções de Gestão (Eliminar Registo)"):
+            with st.expander("🗑️ Opções de Gestão (Eliminar Registo de Forma Permanente)"):
                 lista_moldes = list(set([i["molde"] for i in linhas if "molde" in i]))
                 molde_apagar = st.selectbox("Selecione o molde a remover da base de dados:", lista_moldes)
                 
