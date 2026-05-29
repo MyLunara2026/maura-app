@@ -35,7 +35,7 @@ div.stButton > button[key="btn_adicionar"] { width: 100%; background-color: #27a
 div.stButton > button[key="btn_guardar_edicao"] { width: 100%; background-color: #2980b9 !important; color: white !important; border-radius: 6px !important; height: 3.2em; font-weight: bold !important; border: none !important; }
 
 /* Botão ELIMINAR (Vermelho) */
-div[data-testid="stExpander"] button { background-color: #c0392b !important; color: white !important; border-radius: 6px !important; font-weight: bold !important; border: none !important; width: 100%; height: 3em; }
+div.stButton > button[key="btn_eliminar_direto"] { width: 100%; background-color: #c0392b !important; color: white !important; border-radius: 6px !important; height: 3.2em; font-weight: bold !important; border: none !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -43,7 +43,7 @@ div[data-testid="stExpander"] button { background-color: #c0392b !important; col
 st.markdown("""
 <div style='background-color: #002b5b; padding: 25px; border-radius: 12px; margin-bottom: 25px; border-bottom: 6px solid #cfa134; box-shadow: 0 4px 10px rgba(0,0,0,0.1);'>
     <h1 style='color: #f4ecd8; margin: 0; font-family: "Helvetica Neue", sans-serif; font-weight: 700; text-align: center;'>GESTÃO DE MOLDES: GESSO & CERA</h1>
-    <p style='color: #cfa134; margin: 6px 0 0 0; font-size: 1.1rem; font-weight: 500; text-align: center;'>Calculadora Inteligente com Dosagem de Cera Automática</p>
+    <p style='color: #cfa134; margin: 6px 0 0 0; font-size: 1.1rem; font-weight: 500; text-align: center;'>Clique diretamente numa linha da tabela para Editar ou Apagar</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -77,13 +77,11 @@ with col1:
         extra = st.number_input("Material Extra (€)", min_value=0.0, value=0.50, step=0.10)
         mult = st.number_input("Multiplicador Mão de Obra (x)", min_value=1.0, value=3.0, step=0.5)
         
-        submetido = st.form_submit_button("ADICIONAR", key="btn_adicionar")
+        submetido = st.form_submit_button("ADICIONAR NOVO REGISTO", key="btn_adicionar")
 
 if submetido:
     if molde and v_total is not None and v_total > 0:
-        gramas_cera = 0.0
-        if tipo_producao in ["Cera", "Gesso + Cera"]:
-            gramas_cera = v_total * 0.89 if recipiente == "Molde" else v_total * 0.86
+        gramas_cera = v_total * 0.89 if (tipo_producao in ["Cera", "Gesso + Cera"] and recipiente == "Molde") else (v_total * 0.86 if tipo_producao in ["Cera", "Gesso + Cera"] else 0.0)
 
         if tipo_producao == "Cera":
             agua, gesso, custo_gesso = 0.0, 0.0, 0.0
@@ -101,7 +99,6 @@ if submetido:
             
         custo_total_mat = custo_gesso + custo_cera + extra
         valor_final = custo_total_mat * mult
-        
         nome_final_molde = f"{molde} ({recipiente})" if recipiente != "Não se aplica" else molde
         
         dados_novos = {
@@ -112,42 +109,52 @@ if submetido:
         try:
             res = requests.post(f"{SUPABASE_URL}/rest/v1/moldes", json=dados_novos, headers=HEADERS)
             if res.status_code in [200, 201, 204]:
-                st.success(f"Molde '{molde}' adicionado com sucesso!")
+                st.success(f"Molde '{molde}' adicionado!")
                 st.rerun()
         except:
             st.rerun()
-    else:
-        st.warning("Preencha o Nome do Molde e o Volume antes de avançar.")
 
 with col2:
-    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px;'>📊 Histórico de Produção</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px;'>📊 Histórico de Produção (Clique numa linha)</h3>", unsafe_allow_html=True)
+    
+    dados_selecionados = None
     
     if conexao_ok:
         if linhas:
             df = pd.DataFrame(linhas)
             df_visual = df[["molde", "tipo", "agua", "gesso", "cera", "custo_mat", "valor_final"]]
             df_visual.columns = ["Molde (Recipiente)", "Tipo", "Água", "Gesso", "Cera Calculada", "Custo Mat.", "PREÇO FINAL"]
-            st.dataframe(df_visual, use_container_width=True, hide_index=True)
+            
+            # --- TABELA INTERATIVA COM SELEÇÃO DE LINHA ---
+            selecao = st.dataframe(
+                df_visual, 
+                use_container_width=True, 
+                hide_index=True,
+                selection_mode="single-row",  # Ativa a seleção de uma linha individual
+                on_select="rerun"            # Recarrega o ecrã instantaneamente ao clicar
+            )
+            
+            # Verificar se o utilizador clicou em alguma linha
+            linhas_clicadas = selecao.get("selection", {}).get("rows", [])
+            if linhas_clicadas:
+                index_clicado = linhas_clicadas[0]
+                dados_selecionados = linhas[index_clicado]  # Puxa os dados reais da linha clicada
             
             st.write("")
-            # --- PAINEL DE EDIÇÃO ATUALIZADO (COM VOLUME ML) ---
-            with st.expander("📝 Opções de Gestão: Editar Dados Existentes"):
-                lista_moldes_edit = list(set([i["molde"] for i in linhas if "molde" in i]))
-                molde_escolhido = st.selectbox("Selecione o molde que quer alterar:", lista_moldes_edit)
-                dados_atuais = next((item for item in linhas if item["molde"] == molde_escolhido), None)
+            
+            # --- ZONA DE GESTÃO DINÂMICA (Só aparece se clicares na tabela) ---
+            if dados_selecionados:
+                st.markdown(f"<div style='background-color: #002b5b; padding: 10px; border-radius: 6px; color: white; font-weight: bold;'>⚙️ A Gestor o Molde Selecionado: {dados_selecionados['molde']}</div>", unsafe_allow_html=True)
                 
-                if dados_atuais:
+                with st.expander("📝 Editar ou Apagar o Molde Selecionado", expanded=True):
                     c_ed1, c_ed2 = st.columns(2)
                     with c_ed1:
-                        novo_nome = st.text_input("Corrigir Nome do Molde", value=dados_atuais["molde"])
-                        novo_tipo = st.selectbox("Mudar Tipo", ["Gesso", "Cera", "Gesso + Cera"], index=["Gesso", "Cera", "Gesso + Cera"].index(dados_atuais["tipo"]))
-                        # NOVA CAIXA ADICIONADA AQUI:
-                        novo_vol = st.number_input("Corrigir Volume Total (ml)", min_value=1.0, step=10.0, value=200.0)
+                        novo_nome = st.text_input("Corrigir Nome", value=dados_selecionados["molde"])
+                        novo_tipo = st.selectbox("Mudar Material", ["Gesso", "Cera", "Gesso + Cera"], index=["Gesso", "Cera", "Gesso + Cera"].index(dados_selecionados["tipo"]))
+                        novo_vol = st.number_input("Introduzir Novo Volume (ml)", min_value=1.0, step=10.0, value=200.0)
+                    
                     with c_ed2:
-                        # Identifica se é molde ou sem tampa pelo nome antigo para manter a lógicaLunae
                         tipo_rec = "Sem Tampa" if "Sem Tampa" in novo_nome else "Molde"
-                        
-                        # Recalcula tudo em tempo real para a edição com base no novo volume digitado
                         g_cera_ed = novo_vol * 0.89 if tipo_rec == "Molde" else novo_vol * 0.86
                         
                         if novo_tipo == "Cera":
@@ -167,37 +174,36 @@ with col2:
                         c_total_ed = c_ge_ed + c_ce_ed + 0.50
                         v_final_ed = c_total_ed * 3.0
                         
-                        st.info(f"Novos Valores Automáticos:\n- Custo: {c_total_ed:.2f}€\n- Preço: {v_final_ed:.2f}€")
+                        st.info(f"Novos Valores Calculados:\n- Custo: {c_total_ed:.2f}€\n- Preço Final: {v_final_ed:.2f}€")
                     
-                    if st.button("GUARDAR ALTERAÇÕES", key="btn_guardar_edicao"):
-                        dados_atualizados = {
-                            "molde": novo_nome,
-                            "tipo": novo_tipo,
-                            "agua": f"{ag_ed:.0f}g",
-                            "gesso": f"{ge_ed:.0f}g",
-                            "cera": f"{g_cera_ed:.0f}g",
-                            "custo_mat": f"{c_total_ed:.2f}€",
-                            "valor_final": f"{v_final_ed:.2f}€"
-                        }
-                        try:
-                            res_put = requests.patch(f"{SUPABASE_URL}/rest/v1/moldes?id=eq.{dados_atuais['id']}", json=dados_atualizados, headers=HEADERS)
-                            if res_put.status_code in [200, 204]:
-                                st.success("Atualizado com sucesso com os novos cálculos!")
+                    # Dois botões lado a lado para rapidez total
+                    b_col1, b_col2 = st.columns(2)
+                    with b_col1:
+                        if st.button("GUARDAR ALTERAÇÕES", key="btn_guardar_edicao"):
+                            dados_atualizados = {
+                                "molde": novo_nome, "tipo": novo_tipo,
+                                "agua": f"{ag_ed:.0f}g", "gesso": f"{ge_ed:.0f}g", "cera": f"{g_cera_ed:.0f}g",
+                                "custo_mat": f"{c_total_ed:.2f}€", "valor_final": f"{v_final_ed:.2f}€"
+                            }
+                            try:
+                                res_put = requests.patch(f"{SUPABASE_URL}/rest/v1/moldes?id=eq.{dados_selecionados['id']}", json=dados_atualizados, headers=HEADERS)
+                                if res_put.status_code in [200, 204]:
+                                    st.success("Atualizado!")
+                                    st.rerun()
+                            except:
                                 st.rerun()
-                        except:
-                            st.rerun()
-            
-            # --- PAINEL DE ELIMINAÇÃO ---
-            with st.expander("🗑️ Opções de Gestão: Eliminar Registos"):
-                lista_moldes_del = list(set([i["molde"] for i in linhas if "molde" in i]))
-                molde_apagar = st.selectbox("Selecione o molde a remover:", lista_moldes_del)
-                if st.button("ELIMINAR REGISTO SELECIONADO"):
-                    try:
-                        res_del = requests.delete(f"{SUPABASE_URL}/rest/v1/moldes?molde=eq.{molde_apagar}", headers=HEADERS)
-                        if res_del.status_code in [200, 204]:
-                            st.rerun()
-                    except:
-                        st.rerun()
+                    
+                    with b_col2:
+                        if st.button("ELIMINAR ESTE REGISTO", key="btn_eliminar_direto"):
+                            try:
+                                res_del = requests.delete(f"{SUPABASE_URL}/rest/v1/moldes?id=eq.{dados_selecionados['id']}", headers=HEADERS)
+                                if res_del.status_code in [200, 204]:
+                                    st.success("Eliminado!")
+                                    st.rerun()
+                            except:
+                                st.rerun()
+            else:
+                st.info("💡 Dica: Clique numa linha da tabela acima para alterar ou apagar rapidamente esses dados.")
         else:
             st.info("A base de dados está vazia.")
     else:
