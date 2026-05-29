@@ -43,45 +43,4 @@ st.markdown("""
 st.markdown("""
     <div style='background-color: #002b5b; padding: 25px; border-radius: 12px; margin-bottom: 25px; border-bottom: 6px solid #cfa134; box-shadow: 0 4px 10px rgba(0,0,0,0.1);'>
         <h1 style='color: #f4ecd8; margin: 0; font-family: \"Helvetica Neue\", sans-serif; font-weight: 700; text-align: center;'>GESTÃO DE MOLDES: GESSO & CERA</h1>
-        <p style='color: #cfa134; margin: 6px 0 0 0; font-size: 1.1rem; font-weight: 500; text-align: center;'>Calculadora de Custos e Receitas Sincronizada em Tempo Real</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-# --- SESSÃO DE DADOS (Puxar da Nuvem) ---
-linhas = []
-conexao_ok = False
-try:
-    response_get = requests.get(f"{SUPABASE_URL}/rest/v1/moldes?select=*&order=id.desc", headers=HEADERS)
-    if response_get.status_code == 200:
-        linhas = response_get.json()
-        conexao_ok = True
-except:
-    conexao_ok = False
-
-# Criar as duas colunas principais
-col1, col2 = st.columns([1, 1.4], gap="large")
-
-with col1:
-    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #cfa134; padding-left: 10px;'>📋 Formulário de Trabalho</h3>", unsafe_allow_html=True)
-    
-    with st.form("formulario_molde", clear_on_submit=True):
-        molde = st.text_input("Nome do Molde", placeholder="Ex: Jarra Tulipa")
-        
-        # 1. Os 3 botões solicitados organizados de forma horizontal e limpa
-        tipo_producao = st.radio("Selecione o Material:", ["Gesso", "Cera", "Gesso + Cera"], horizontal=True)
-        
-        # Campos de valores que começam totalmente a branco (sem zeros)
-        v_total = st.number_input("Volume Total (ml)", min_value=0.0, step=10.0, value=None, placeholder="Introduza o volume total...")
-        
-        gramas_cera = 0.0
-        # Só pede o peso se envolver cera ("Cera" ou "Gesso + Cera")
-        if tipo_producao in ["Cera", "Gesso + Cera"]:
-            gramas_cera_input = st.number_input("Peso da Cera (g)", min_value=0.0, step=5.0, value=None, placeholder="Introduza as gramas de cera...")
-            if gramas_cera_input is not None:
-                gramas_cera = gramas_cera_input
-            
-        st.write("---")
-        extra = st.number_input("Material Extra (€)", min_value=0.0, value=0.50, step=0.10)
-        mult = st.number_input("Multiplicador Mão de Obra (x)", min_value=1.0, value=3.0, step=0.5)
-        
-        submetido = st.form_submit_button("ADICIONAR", key="btn
+        <p style='color: #cfa134; margin: 6px 0 0 0; font-size: 1.1rem; font-weight: 50
