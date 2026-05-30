@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import requests
 import os
-import streamlit.components.v1 as components
 
 # --- CONFIGURAÇÕES DA BASE DE DADOS (SUPABASE) ---
 try:
@@ -39,17 +38,13 @@ div[data-testid="stDecoration"] { display: none !important; }
 div[data-testid="stWidgetLabel"] p { color: #002b5b !important; font-weight: bold !important; }
 div[data-baseweb="input"], div[data-baseweb="number-input"] { border: 2px solid #cfa134 !important; border-radius: 6px !important; background-color: white !important; }
 
-/* ATAQUE CSS: Força o desaparecimento completo de qualquer instrução de widget */
-[data-testid="stWidgetInstructions"], 
-span[data-testid="stWidgetInstructions"], 
-div[data-testid="stWidgetInstructions"] {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    height: 0px !important;
-    font-size: 0px !important;
-    position: absolute !important;
-    pointer-events: none !important;
+/* Caixa visual elegante para o Login (substitui o st.form) */
+.caixa-login-estilizada {
+    border: 2px solid #002b5b !important;
+    border-radius: 12px !important;
+    padding: 25px !important;
+    background-color: #fdfbf7 !important;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.05) !important;
 }
 
 /* Estilização exclusiva do formulário de trabalho interno */
@@ -73,22 +68,6 @@ div.stButton > button[key="btn_login"] { background-color: #002b5b !important; c
 </style>
 """, unsafe_allow_html=True)
 
-# ARMA SECRETA: JavaScript que roda em loop limpando o texto em inglês caso ele queira aparecer
-components.html("""
-<script>
-    const ocultarTextoIngles = () => {
-        const elementos = window.parent.document.querySelectorAll('[data-testid="stWidgetInstructions"]');
-        elementos.forEach(el => {
-            el.style.display = 'none';
-            el.innerHTML = '';
-        });
-    };
-    // Executa imediatamente e continua a verificar a cada 100 milissegundos
-    ocultarTextoIngles();
-    setInterval(ocultarTextoIngles, 100);
-</script>
-""", height=0, width=0)
-
 # --- SISTEMA DE CONTROLO DE LOGIN ---
 if "autenticado" not in st.session_state:
     st.session_state["autenticado"] = False
@@ -111,24 +90,27 @@ if not st.session_state["autenticado"]:
             </div>
             """, unsafe_allow_html=True)
         
-        with st.form("form_login"):
-            st.markdown("""
+        # Criamos a estrutura visual idêntica, mas SEM usar st.form (adeus texto em inglês!)
+        st.markdown("""
+        <div class="caixa-login-estilizada">
             <div style='text-align: center; margin-bottom: 15px;'>
                 <h3 style='color: #002b5b; margin: 0; font-family: sans-serif;'>Área de Login</h3>
                 <p style='color: #7f8c8d; margin: 2px 0 0 0; font-size: 0.9rem;'>Introduza as suas credenciais de acesso</p>
             </div>
-            """, unsafe_allow_html=True)
-            
-            usuario_input = st.text_input("Utilizador")
-            senha_input = st.text_input("Palavra-passe", type="password")
-            botao_entrar = st.form_submit_button("ENTRAR NO PAINEL", key="btn_login")
-            
-            if botao_entrar:
-                if usuario_input == "lunara2026" and senha_input == "220415F&M":
-                    st.session_state["autenticado"] = True
-                    st.rerun()
-                else:
-                    st.error("Credenciais incorretas. Tente novamente.")
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Os campos ficam logo abaixo da moldura estruturada de forma limpa
+        usuario_input = st.text_input("Utilizador")
+        senha_input = st.text_input("Palavra-passe", type="password")
+        botao_entrar = st.button("ENTRAR NO PAINEL", key="btn_login")
+        
+        if botao_entrar:
+            if usuario_input == "lunara2026" and senha_input == "220415F&M":
+                st.session_state["autenticado"] = True
+                st.rerun()
+            else:
+                st.error("Credenciais incorretas. Tente novamente.")
     st.stop()
 
 # =====================================================================
@@ -226,7 +208,7 @@ if submetido:
             st.rerun()
 
 with col2:
-    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px; margin-bottom: 15px;'>📊 Histórico de Produção</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px; margin-bottom: 15px;'>📊 Histórico de Production</h3>", unsafe_allow_html=True)
     
     dados_selecionados = None
     if conexao_ok:
