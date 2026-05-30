@@ -37,6 +37,17 @@ div[data-testid="stDecoration"] { display: none !important; }
 /* Configuração de Cores Gerais do Painel Lunara */
 .stApp { background-color: #f4ecd8 !important; }
 
+/* SOLUÇÃO DE COR PRETA FINAL: 
+   O Streamlit usa -webkit-text-fill-color para trancar a cor cinzenta nas tags <p> dos labels.
+   Forçando esta regra para #000000, o texto fica com um preto nítido e legível sem deformar.
+*/
+div[data-testid="stForm"] label p {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+    font-weight: 700 !important;
+    font-size: 1.1rem !important;
+}
+
 /* Bordas dos inputs */
 div[data-baseweb="input"], div[data-baseweb="number-input"] { border: 2px solid #cfa134 !important; border-radius: 6px !important; background-color: white !important; }
 
@@ -100,11 +111,8 @@ if not st.session_state["autenticado"]:
         """, unsafe_allow_html=True)
         
         with st.form("form_login"):
-            # SOLUÇÃO INTACTA: HTML Inline injetado diretamente nos títulos para forçar a cor e o estilo corretos sem falhas!
-            usuario_input = st.text_input(label="Utilizador", label_visibility="visible")
-            st.markdown('<style>div[data-testid="stWidgetLabel"] label p { color: #000000 !important; font-weight: 700 !important; font-size: 1.1rem !important; }</style>', unsafe_allow_html=True)
-            
-            senha_input = st.text_input(label="Palavra-passe", type="password", label_visibility="visible")
+            usuario_input = st.text_input("Utilizador")
+            senha_input = st.text_input("Palavra-passe", type="password")
             
             st.markdown('<div class="div-botao-central">', unsafe_allow_html=True)
             botao_entrar = st.form_submit_button("ENTRAR NO PAINEL", key="btn_login")
