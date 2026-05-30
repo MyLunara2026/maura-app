@@ -37,7 +37,9 @@ div[data-testid="stDecoration"] { display: none !important; }
 .stApp { background-color: #f4ecd8 !important; }
 div[data-testid="stWidgetLabel"] p { color: #002b5b !important; font-weight: bold !important; }
 div[data-baseweb="input"], div[data-baseweb="number-input"] { border: 2px solid #cfa134 !important; border-radius: 6px !important; background-color: white !important; }
-div[data-testid="stForm"] { border: 2px solid #002b5b !important; border-radius: 12px !important; padding: 25px !important; background-color: #fdfbf7 !important; box-shadow: 0 6px 15px rgba(0,0,0,0.05) !important; }
+
+/* Estilização exclusiva do formulário de trabalho interno */
+div[data-testid="stColumn"] div[data-testid="stForm"] { border: 2px solid #002b5b !important; border-radius: 12px !important; padding: 25px !important; background-color: #fdfbf7 !important; box-shadow: 0 6px 15px rgba(0,0,0,0.05) !important; }
 
 /* Contentor para Centralizar o Logo no Login */
 .logo-login-box {
@@ -199,9 +201,9 @@ with col2:
         if linhas:
             df = pd.DataFrame(linhas)
             df_visual = df[["molde", "tipo", "agua", "gesso", "cera", "custo_mat", "valor_final"]]
-            df_visual.columns = ["Molde (Recipiente)", "Tipo", "Água", "Gesso", "Cera Calculada", "Custo Mat.", "PREÇO FINAL"]
+            # Alterado de 'Cera Calculada' para apenas 'Cera'
+            df_visual.columns = ["Molde (Recipiente)", "Tipo", "Água", "Gesso", "Cera", "Custo Mat.", "PREÇO FINAL"]
             
-            # Aumentámos a altura (height=480) para exibir muito mais linhas de uma só vez
             selecao = st.dataframe(
                 df_visual, 
                 use_container_width=True, 
@@ -218,7 +220,6 @@ with col2:
             
             st.write("")
             
-            # Se uma linha for clicada, abre o menu de edição
             if dados_selecionados:
                 st.markdown(f"<div style='background-color: #002b5b; padding: 10px; border-radius: 6px; color: white; font-weight: bold;'>⚙️ A Gerir: {dados_selecionados['molde']}</div>", unsafe_allow_html=True)
                 
@@ -277,7 +278,6 @@ with col2:
                             except:
                                 st.rerun()
             else:
-                # Dica posicionada de forma limpa e fixa cá em baixo quando nada está selecionado
                 st.info("💡 Clique numa linha da tabela para gerir os dados.")
         else:
             st.info("A base de dados está vazia.")
