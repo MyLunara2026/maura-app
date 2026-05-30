@@ -21,21 +21,26 @@ HEADERS = {
 # --- CONFIGURAÇÃO DA PÁGINA ---
 st.set_page_config(page_title="Maura | Produção Pro", layout="wide", page_icon="🕯️")
 
-# --- DESIGN PERSONALIZADO (REMOÇÃO DE BARRAS E AJUSTE DE ESPAÇOS) ---
-st.markdown("""
+# --- REMOÇÃO FORÇADA DA BARRA PRETA INFERIOR E TIMING DO TOPO ---
+st.html("""
 <style>
-/* Remove completamente a barra do topo, o menu e o rodapé */
-header { visibility: hidden !important; height: 0px !important; }
+/* Remove a barra superior do Streamlit e o menu padrão */
+header, footer { visibility: hidden !important; height: 0px !important; }
 #MainMenu { visibility: hidden !important; }
-footer { visibility: hidden !important; }
 div[data-testid="stDecoration"] { display: none !important; }
 
-/* Remove o botão preto 'Gerenciar aplicativo' no canto inferior direito */
-div[data-testid="stViewerBadge"] { display: none !important; }
-iframe[title="Managed Hosting Badge"] { display: none !important; }
-.stViewerBadge { display: none !important; }
+/* Esconde o botão preto 'Gerenciar aplicativo' de forma absoluta */
+[data-testid="stViewerBadge"], 
+.stViewerBadge, 
+iframe[title="Managed Hosting Badge"],
+div[class*="stViewerBadge"] { 
+    display: none !important; 
+    visibility: hidden !important; 
+    height: 0px !important; 
+    width: 0px !important;
+}
 
-/* Elimina o espaço em branco exagerado no topo da página */
+/* Puxa o conteúdo todo para o topo da página */
 .block-container { padding-top: 1.5rem !important; padding-bottom: 1rem !important; }
 
 /* Configuração de Cores Gerais */
@@ -60,7 +65,7 @@ div.stButton > button[key="btn_guardar_edicao"] { width: 100%; background-color:
 div.stButton > button[key="btn_eliminar_direto"] { width: 100%; background-color: #c0392b !important; color: white !important; border-radius: 6px !important; height: 3.2em; font-weight: bold !important; border: none !important; }
 div.stButton > button[key="btn_login"] { background-color: #002b5b !important; color: white !important; font-weight: bold !important; width: 100%; height: 3em; border-radius: 6px !important; }
 </style>
-""", unsafe_allow_html=True)
+""")
 
 # --- SISTEMA DE CONTROLO DE LOGIN ---
 if "autenticado" not in st.session_state:
@@ -97,7 +102,6 @@ if not st.session_state["autenticado"]:
             botao_entrar = st.form_submit_button("ENTRAR NO PAINEL", key="btn_login")
             
             if botao_entrar:
-                # Credenciais atualizadas conforme o teu pedido anterior
                 if usuario_input == "lunara2026" and senha_input == "220415F&M":
                     st.session_state["autenticado"] = True
                     st.rerun()
@@ -162,7 +166,7 @@ with col1:
         extra = st.number_input("Material Extra (€)", min_value=0.0, value=0.50, step=0.10)
         mult = st.number_input("Multiplicador Mão de Obra (x)", min_value=1.0, value=3.0, step=0.5)
         
-        submetido = st.form_submit_button("ADICIONAR NOVO REGISTO", key="btn_adicionar")
+        submetido = st.form_submit_button("ADICIONAR NEW REGISTO", key="btn_adicionar")
 
 if submetido:
     if molde and v_total is not None and v_total > 0:
@@ -232,58 +236,4 @@ with col2:
                     with c_ed1:
                         novo_nome = st.text_input("Corrigir Nome", value=dados_selecionados["molde"])
                         novo_tipo = st.selectbox("Mudar Material", ["Gesso", "Cera", "Gesso + Cera"], index=["Gesso", "Cera", "Gesso + Cera"].index(dados_selecionados["tipo"]))
-                        novo_vol = st.number_input("Introduzir Novo Volume (ml)", min_value=1.0, step=10.0, value=200.0)
-                    
-                    with c_ed2:
-                        tipo_rec = "Sem Tampa" if "Sem Tampa" in novo_nome else "Molde"
-                        g_cera_ed = novo_vol * 0.89 if tipo_rec == "Molde" else novo_vol * 0.86
-                        
-                        if novo_tipo == "Cera":
-                            ag_ed, ge_ed, c_ge_ed = 0.0, 0.0, 0.0
-                            c_ce_ed = (g_cera_ed * 17.50) / 2000
-                        elif novo_tipo == "Gesso":
-                            ag_ed = novo_vol / 2
-                            ge_ed = ag_ed * 2.5
-                            c_ge_ed = (ge_ed * 7.49) / 1000
-                            g_cera_ed, c_ce_ed = 0.0, 0.0
-                        else:
-                            ag_ed = novo_vol / 2
-                            ge_ed = ag_ed * 2.5
-                            c_ge_ed = (ge_ed * 7.49) / 1000
-                            c_ce_ed = (g_cera_ed * 17.50) / 2000
-                        
-                        c_total_ed = c_ge_ed + c_ce_ed + 0.50
-                        v_final_ed = c_total_ed * 3.0
-                        st.info(f"Novos Valores Calculados:\n- Custo: {c_total_ed:.2f}€\n- Preço Final: {v_final_ed:.2f}€")
-                    
-                    b_col1, b_col2 = st.columns(2)
-                    with b_col1:
-                        if st.button("GUARDAR ALTERAÇÕES", key="btn_guardar_edicao"):
-                            dados_atualizados = {
-                                "molde": novo_nome, "tipo": novo_tipo,
-                                "agua": f"{ag_ed:.0f}g", "gesso": f"{ge_ed:.0f}g", "cera": f"{g_cera_ed:.0f}g",
-                                "custo_mat": f"{c_total_ed:.2f}€", "valor_final": f"{v_final_ed:.2f}€"
-                            }
-                            try:
-                                res_put = requests.patch(f"{SUPABASE_URL}/rest/v1/moldes?id=eq.{dados_selecionados['id']}", json=dados_atualizados, headers=HEADERS)
-                                if res_put.status_code in [200, 204]:
-                                    st.success("Atualizado!")
-                                    st.rerun()
-                            except:
-                                st.rerun()
-                    
-                    with b_col2:
-                        if st.button("ELIMINAR ESTE REGISTO", key="btn_eliminar_direto"):
-                            try:
-                                res_del = requests.delete(f"{SUPABASE_URL}/rest/v1/moldes?id=eq.{dados_selecionados['id']}", headers=HEADERS)
-                                if res_del.status_code in [200, 204]:
-                                    st.success("Eliminado!")
-                                    st.rerun()
-                            except:
-                                st.rerun()
-            else:
-                st.info("💡 Clique numa linha da tabela para gerir os dados.")
-        else:
-            st.info("A base de dados está vazia.")
-    else:
-        st.error("Não foi possível ligar à nuvem.")
+                        novo_vol = st.number_input("Introduzir Novo Volume (ml)", min
