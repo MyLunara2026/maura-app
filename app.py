@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import requests
 import os
+import base64
 
 # --- CONFIGURAÇÕES DA BASE DE DADOS (SUPABASE) ---
 try:
@@ -35,7 +36,15 @@ div[data-testid="stDecoration"] { display: none !important; }
 
 /* Configuração de Cores Gerais do Painel Lunara */
 .stApp { background-color: #f4ecd8 !important; }
-div[data-testid="stWidgetLabel"] p { color: #002b5b !important; font-weight: bold !important; }
+
+/* Letras dos campos (Utilizador e Palavra-passe) mais carregadas e destacadas */
+div[data-testid="stWidgetLabel"] p { 
+    color: #002b5b !important; 
+    font-weight: 800 !important; 
+    font-size: 1.15rem !important; 
+    font-family: sans-serif !important;
+}
+
 div[data-baseweb="input"], div[data-baseweb="number-input"] { border: 2px solid #cfa134 !important; border-radius: 6px !important; background-color: white !important; }
 
 /* Estilização exclusiva do formulário de trabalho interno */
@@ -51,11 +60,20 @@ div[data-testid="stColumn"] div[data-testid="stForm"] { border: 2px solid #002b5
     margin-bottom: 25px;
 }
 
+/* Regra para centrar o botão teimoso */
+.div-botao-central {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin-top: 20px !important;
+}
+
 /* Botões Customizados */
 div.stButton > button[key="btn_adicionar"] { width: 100%; background-color: #27ae60 !important; color: white !important; border-radius: 6px !important; height: 3.2em; font-weight: bold !important; border: none !important; }
 div.stButton > button[key="btn_guardar_edicao"] { width: 100%; background-color: #2980b9 !important; color: white !important; border-radius: 6px !important; height: 3.2em; font-weight: bold !important; border: none !important; }
 div.stButton > button[key="btn_eliminar_direto"] { width: 100%; background-color: #c0392b !important; color: white !important; border-radius: 6px !important; height: 3.2em; font-weight: bold !important; border: none !important; }
-div.stButton > button[key="btn_login"] { background-color: #002b5b !important; color: white !important; font-weight: bold !important; width: 100%; height: 3em; border-radius: 6px !important; }
+div.stButton > button[key="btn_login"] { background-color: #002b5b !important; color: white !important; font-weight: bold !important; width: 260px !important; height: 3em; border-radius: 6px !important; border: none !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -70,14 +88,14 @@ if not st.session_state["autenticado"]:
     
     with col_l2:
         if os.path.exists("logo.png"):
-            import base64
             with open("logo.png", "rb") as f:
                 data = f.read()
                 encoded = base64.b64encode(data).decode()
             
+            # Logótipo aumentado para 220px para se destacar e não se perder no ecrã
             st.markdown(f"""
             <div class='logo-login-box'>
-                <img src='data:image/png;base64,{encoded}' style='width: 150px; height: auto;'>
+                <img src='data:image/png;base64,{encoded}' style='width: 220px; height: auto;'>
             </div>
             """, unsafe_allow_html=True)
         
@@ -91,7 +109,11 @@ if not st.session_state["autenticado"]:
         with st.form("form_login"):
             usuario_input = st.text_input("Utilizador")
             senha_input = st.text_input("Palavra-passe", type="password")
+            
+            # Alinhamento central do botão utilizando HTML estrutural junto ao componente
+            st.markdown('<div class="div-botao-central">', unsafe_allow_html=True)
             botao_entrar = st.form_submit_button("ENTRAR NO PAINEL", key="btn_login")
+            st.markdown('</div>', unsafe_allow_html=True)
             
             if botao_entrar:
                 if usuario_input == "lunara2026" and senha_input == "220415F&M":
@@ -194,14 +216,13 @@ if submetido:
             st.rerun()
 
 with col2:
-    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px; margin-bottom: 15px;'>📊 Histórico de Produção</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px; margin-bottom: 15px;'>📊 Histórico de Production</h3>", unsafe_allow_html=True)
     
     dados_selecionados = None
     if conexao_ok:
         if linhas:
             df = pd.DataFrame(linhas)
             df_visual = df[["molde", "tipo", "agua", "gesso", "cera", "custo_mat", "valor_final"]]
-            # Alterado de 'Cera Calculada' para apenas 'Cera'
             df_visual.columns = ["Molde (Recipiente)", "Tipo", "Água", "Gesso", "Cera", "Custo Mat.", "PREÇO FINAL"]
             
             selecao = st.dataframe(
@@ -216,7 +237,7 @@ with col2:
             linhas_clicadas = selecao.get("selection", {}).get("rows", [])
             if linhas_clicadas:
                 index_clicado = linhas_clicadas[0]
-                dados_selecionados = linhas[index_clicado]
+                dados_selecionados = lines[index_clicado]
             
             st.write("")
             
