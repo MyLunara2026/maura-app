@@ -37,12 +37,16 @@ div[data-testid="stDecoration"] { display: none !important; }
 /* Configuração de Cores Gerais do Painel Lunara */
 .stApp { background-color: #f4ecd8 !important; }
 
-/* Letras dos campos (Utilizador e Palavra-passe) mais carregadas e destacadas */
-div[data-testid="stWidgetLabel"] p { 
-    color: #002b5b !important; 
+/* CORREÇÃO PRETO FORTE: Alvo direto nos labels do Streamlit para o texto ficar bem escuro e nítido */
+label, 
+div[data-testid="stWidgetLabel"] p, 
+.st-emotion-cache-ue68e5, 
+.st-emotion-cache-1p27gi6 { 
+    color: #000000 !important; 
     font-weight: 800 !important; 
     font-size: 1.15rem !important; 
     font-family: sans-serif !important;
+    -webkit-text-fill-color: #000000 !important;
 }
 
 div[data-baseweb="input"], div[data-baseweb="number-input"] { border: 2px solid #cfa134 !important; border-radius: 6px !important; background-color: white !important; }
@@ -92,7 +96,7 @@ if not st.session_state["autenticado"]:
                 data = f.read()
                 encoded = base64.b64encode(data).decode()
             
-            # Logótipo aumentado para 220px para se destacar e não se perder no ecrã
+            # Logótipo aumentado para 220px para destaque visual na caixa azul
             st.markdown(f"""
             <div class='logo-login-box'>
                 <img src='data:image/png;base64,{encoded}' style='width: 220px; height: auto;'>
@@ -216,7 +220,7 @@ if submetido:
             st.rerun()
 
 with col2:
-    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px; margin-bottom: 15px;'>📊 Histórico de Production</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px; margin-bottom: 15px;'>📊 Histórico de Produção</h3>", unsafe_allow_html=True)
     
     dados_selecionados = None
     if conexao_ok:
@@ -237,7 +241,7 @@ with col2:
             linhas_clicadas = selecao.get("selection", {}).get("rows", [])
             if linhas_clicadas:
                 index_clicado = linhas_clicadas[0]
-                dados_selecionados = lines[index_clicado]
+                dados_selecionados = linhas[index_clicado]
             
             st.write("")
             
