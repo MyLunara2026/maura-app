@@ -59,26 +59,28 @@ div[data-baseweb="input"], div[data-baseweb="number-input"] {
     margin-bottom: 25px !important;
 }
 
-/* Contentor do Logo: Centralizado e com espaço de respiro */
+/* Contentor do Logo: Totalmente centralizado e com espaço de respiro */
 .logo-login-box {
     display: flex;
     justify-content: center;
     align-items: center;
     text-align: center;
     width: 100%;
-    margin-bottom: 30px !important;
+    margin-bottom: 25px !important;
     margin-top: 10px;
 }
 
-/* Alinhamento Forçado e Estilização do Botão Entrar */
-.div-botao-centrado {
+/* CENTRALIZAÇÃO ABSOLUTA DO BOTÃO ENTRAR */
+/* Força o bloco que contém o botão a centrar o seu conteúdo horizontalmente */
+div.stButton {
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
     width: 100% !important;
-    margin-top: 20px !important;
+    text-align: center !important;
 }
 
+/* Estilização impecável do botão de login */
 div.stButton > button[key="btn_login"] { 
     background-color: #002b5b !important; 
     color: #ffffff !important; 
@@ -86,8 +88,8 @@ div.stButton > button[key="btn_login"] {
     font-size: 1.05rem !important;
     text-transform: uppercase !important;
     letter-spacing: 1px !important;
-    width: 220px !important; /* Tamanho fixo e elegante */
-    height: 45px !important; 
+    width: 240px !important; /* Tamanho perfeito para o centro */
+    height: 46px !important; 
     border-radius: 6px !important; 
     border: none !important;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1) !important;
@@ -115,9 +117,10 @@ if not st.session_state["autenticado"]:
                 data = f.read()
                 encoded = base64.b64encode(data).decode()
             
+            # Logótipo aumentado para 210px para uma presença mais forte e bonita
             st.markdown(f"""
             <div class='logo-login-box'>
-                <img src='data:image/png;base64,{encoded}' style='width: 135px; height: auto;'>
+                <img src='data:image/png;base64,{encoded}' style='width: 210px; height: auto;'>
             </div>
             """, unsafe_allow_html=True)
         
@@ -133,10 +136,8 @@ if not st.session_state["autenticado"]:
         usuario_input = st.text_input("Utilizador", key="input_user")
         senha_input = st.text_input("Palavra-passe", type="password", key="input_pass")
         
-        # Bloco HTML com classe personalizada para garantir a centralização real do botão
-        st.markdown('<div class="div-botao-centrado">', unsafe_allow_html=True)
+        st.write("") # Espaço estético antes do botão
         botao_entrar = st.button("ENTRAR NO PAINEL", key="btn_login")
-        st.markdown('</div>', unsafe_allow_html=True)
         
         if botao_entrar:
             if usuario_input == "lunara2026" and senha_input == "220415F&M":
@@ -262,7 +263,7 @@ with col2:
             linhas_clicadas = selecao.get("selection", {}).get("rows", [])
             if linhas_clicadas:
                 index_clicado = linhas_clicadas[0]
-                dados_selecionados = lines[index_clicado]
+                dados_selecionados = linhas[index_clicado]
             
             st.write("")
             
