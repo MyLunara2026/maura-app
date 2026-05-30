@@ -38,8 +38,19 @@ div[data-testid="stDecoration"] { display: none !important; }
 div[data-testid="stWidgetLabel"] p { color: #002b5b !important; font-weight: bold !important; }
 div[data-baseweb="input"], div[data-baseweb="number-input"] { border: 2px solid #cfa134 !important; border-radius: 6px !important; background-color: white !important; }
 
-/* REGRA DE OURO: Oculta o texto automático "Press Enter to submit form" */
-span[data-testid="stWidgetInstructions"] { display: none !important; }
+/* SOLUÇÃO DEFINITIVA: Desativa e oculta completamente o texto "Press Enter to submit form" */
+span[data-testid="stWidgetInstructions"], 
+div[data-testid="stWidgetInstructions"] span, 
+div[data-testid="stWidgetInstructions"] {
+    font-size: 0px !important;
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0px !important;
+    line-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
 
 /* Estilização exclusiva do formulário de trabalho interno */
 div[data-testid="stColumn"] div[data-testid="stForm"] { border: 2px solid #002b5b !important; border-radius: 12px !important; padding: 25px !important; background-color: #fdfbf7 !important; box-shadow: 0 6px 15px rgba(0,0,0,0.05) !important; }
