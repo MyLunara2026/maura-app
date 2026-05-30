@@ -38,6 +38,9 @@ div[data-testid="stDecoration"] { display: none !important; }
 div[data-testid="stWidgetLabel"] p { color: #002b5b !important; font-weight: bold !important; }
 div[data-baseweb="input"], div[data-baseweb="number-input"] { border: 2px solid #cfa134 !important; border-radius: 6px !important; background-color: white !important; }
 
+/* REGRA DE OURO: Oculta o texto automático "Press Enter to submit form" */
+span[data-testid="stWidgetInstructions"] { display: none !important; }
+
 /* Estilização exclusiva do formulário de trabalho interno */
 div[data-testid="stColumn"] div[data-testid="stForm"] { border: 2px solid #002b5b !important; border-radius: 12px !important; padding: 25px !important; background-color: #fdfbf7 !important; box-shadow: 0 6px 15px rgba(0,0,0,0.05) !important; }
 
@@ -48,7 +51,7 @@ div[data-testid="stColumn"] div[data-testid="stForm"] { border: 2px solid #002b5
     align-items: center;
     text-align: center;
     width: 100%;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
 }
 
 /* Botões Customizados */
@@ -66,7 +69,7 @@ if "autenticado" not in st.session_state:
 if not st.session_state["autenticado"]:
     st.write("")
     st.write("")
-    col_l1, col_l2, col_l3 = st.columns([1, 1.2, 1])
+    col_l1, col_l2, col_l3 = st.columns([1, 1.1, 1])
     
     with col_l2:
         if os.path.exists("logo.png"):
@@ -77,18 +80,18 @@ if not st.session_state["autenticado"]:
             
             st.markdown(f"""
             <div class='logo-login-box'>
-                <img src='data:image/png;base64,{encoded}' style='width: 150px; height: auto;'>
+                <img src='data:image/png;base64,{encoded}' style='width: 140px; height: auto;'>
             </div>
             """, unsafe_allow_html=True)
         
-        st.markdown("""
-        <div style='background-color: #002b5b; padding: 18px; border-radius: 12px; border-bottom: 4px solid #cfa134; text-align: center; margin-bottom: 20px;'>
-            <h2 style='color: #f4ecd8; margin: 0; font-family: sans-serif; font-size: 1.6rem;'>Acesso Restrito</h2>
-            <p style='color: #cfa134; margin: 5px 0 0 0;'>Introduza as suas credenciais Lunara</p>
-        </div>
-        """, unsafe_allow_html=True)
-        
         with st.form("form_login"):
+            st.markdown("""
+            <div style='text-align: center; margin-bottom: 15px;'>
+                <h3 style='color: #002b5b; margin: 0; font-family: sans-serif;'>Área de Login</h3>
+                <p style='color: #7f8c8d; margin: 2px 0 0 0; font-size: 0.9rem;'>Introduza as suas credenciais de acesso</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
             usuario_input = st.text_input("Utilizador")
             senha_input = st.text_input("Palavra-passe", type="password")
             botao_entrar = st.form_submit_button("ENTRAR NO PAINEL", key="btn_login")
@@ -105,21 +108,23 @@ if not st.session_state["autenticado"]:
 # --- ÁREA PRIVADA (APÓS LOGIN) ---
 # =====================================================================
 
-# Cabeçalho limpo, focado e perfeitamente centralizado
+# Cabeçalho da Área de Trabalho com o texto explicativo correto
 if os.path.exists("logo.png"):
     col_h1, col_h2 = st.columns([1, 6.5])
     with col_h1:
         st.image("logo.png", width=85)
     with col_h2:
         st.markdown("""
-        <div style='background-color: #002b5b; padding: 14px; border-radius: 12px; margin-bottom: 25px; border-bottom: 6px solid #cfa134; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; display: flex; align-items: center; justify-content: center; height: 85px;'>
-            <h1 style='color: #f4ecd8; margin: 0; font-family: "Helvetica Neue", sans-serif; font-weight: 700; font-size: 1.9rem; letter-spacing: 1px; line-height: 85px;'>LUNARA | GESTÃO DE MOLDES</h1>
+        <div style='background-color: #002b5b; padding: 14px; border-radius: 12px; margin-bottom: 25px; border-bottom: 6px solid #cfa134; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center;'>
+            <h1 style='color: #f4ecd8; margin: 0; font-family: "Helvetica Neue", sans-serif; font-weight: 700; font-size: 1.9rem; letter-spacing: 1px;'>LUNARA | GESTÃO DE MOLDES</h1>
+            <p style='color: #cfa134; margin: 5px 0 0 0; font-size: 0.95rem; font-weight: bold;'>Área Protegida • Clique diretamente numa linha para Editar ou Apagar</p>
         </div>
         """, unsafe_allow_html=True)
 else:
     st.markdown("""
     <div style='background-color: #002b5b; padding: 18px; border-radius: 12px; margin-bottom: 25px; border-bottom: 6px solid #cfa134; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center;'>
         <h1 style='color: #f4ecd8; margin: 0; font-family: "Helvetica Neue", sans-serif; font-weight: 700; font-size: 1.9rem; letter-spacing: 1px;'>LUNARA | GESTÃO DE MOLDES</h1>
+        <p style='color: #cfa134; margin: 5px 0 0 0; font-size: 0.95rem; font-weight: bold;'>Área Protegida • Clique diretamente numa linha para Editar ou Apagar</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -201,7 +206,6 @@ with col2:
         if linhas:
             df = pd.DataFrame(linhas)
             df_visual = df[["molde", "tipo", "agua", "gesso", "cera", "custo_mat", "valor_final"]]
-            # Alterado de 'Cera Calculada' para apenas 'Cera'
             df_visual.columns = ["Molde (Recipiente)", "Tipo", "Água", "Gesso", "Cera", "Custo Mat.", "PREÇO FINAL"]
             
             selecao = st.dataframe(
