@@ -29,9 +29,8 @@ div[data-testid="stWidgetLabel"] p { color: #002b5b !important; font-weight: bol
 div[data-baseweb="input"], div[data-baseweb="number-input"] { border: 2px solid #cfa134 !important; border-radius: 6px !important; background-color: white !important; }
 div[data-testid="stForm"] { border: 2px solid #002b5b !important; border-radius: 12px !important; padding: 25px !important; background-color: #fdfbf7 !important; box-shadow: 0 6px 15px rgba(0,0,0,0.05) !important; }
 
-/* Estilo para centralizar o logo no login */
-.logo-login-container { display: flex; justify-content: center; margin-bottom: 20px; }
-.logo-login { max-width: 150px; border-radius: 50%; border: 3px solid #cfa134; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+/* Centralização Absoluta do Logo no Login */
+.logo-center { display: block; margin-left: auto; margin-right: auto; text-align: center; margin-bottom: 20px; }
 
 /* Botão ADICIONAR (Verde) */
 div.stButton > button[key="btn_adicionar"] { width: 100%; background-color: #27ae60 !important; color: white !important; border-radius: 6px !important; height: 3.2em; font-weight: bold !important; border: none !important; }
@@ -57,25 +56,18 @@ if not st.session_state["autenticado"]:
     col_l1, col_l2, col_l3 = st.columns([1, 1.2, 1])
     
     with col_l2:
-        # Tenta carregar o logo para a tela de login, se não existir usa a vela de segurança
+        # Apresentação do Logo Centralizado
         if os.path.exists("logo.png"):
-            st.write("<div class='logo-login-container'>", unsafe_allow_html=True)
-            st.image("logo.png", width=140)
-            st.write("</div>", unsafe_allow_html=True)
-            
-            st.markdown("""
-            <div style='background-color: #002b5b; padding: 15px; border-radius: 12px; border-bottom: 4px solid #cfa134; text-align: center; margin-bottom: 20px;'>
-                <h2 style='color: #f4ecd8; margin: 0; font-family: sans-serif; font-size: 1.6rem;'>Acesso Restrito</h2>
-                <p style='color: #cfa134; margin: 5px 0 0 0;'>Introduza as suas credenciais Lunara</p>
-            </div>
-            """, unsafe_allow_html=True)
-        else:
-            st.markdown("""
-            <div style='background-color: #002b5b; padding: 20px; border-radius: 12px; border-bottom: 4px solid #cfa134; text-align: center; margin-bottom: 20px;'>
-                <h2 style='color: #f4ecd8; margin: 0; font-family: sans-serif;'>▲ Acesso Restrito</h2>
-                <p style='color: #cfa134; margin: 5px 0 0 0;'>Introduza as suas credenciais Lunara</p>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown("<div class='logo-center'>", unsafe_allow_html=True)
+            st.image("logo.png", width=160)
+            st.markdown("</div>", unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div style='background-color: #002b5b; padding: 18px; border-radius: 12px; border-bottom: 4px solid #cfa134; text-align: center; margin-bottom: 20px;'>
+            <h2 style='color: #f4ecd8; margin: 0; font-family: sans-serif; font-size: 1.6rem;'>Acesso Restrito</h2>
+            <p style='color: #cfa134; margin: 5px 0 0 0;'>Introduza as suas credenciais Lunara</p>
+        </div>
+        """, unsafe_allow_html=True)
         
         with st.form("form_login"):
             usuario_input = st.text_input("Utilizador")
@@ -94,16 +86,15 @@ if not st.session_state["autenticado"]:
 # --- ÁREA PRIVADA (APÓS LOGIN) ---
 # =====================================================================
 
-# Cabeçalho adaptável com ou sem imagem de Logótipo
 if os.path.exists("logo.png"):
-    col_h1, col_h2 = st.columns([1, 5])
+    col_h1, col_h2 = st.columns([1, 6])
     with col_h1:
-        st.image("logo.png", width=100)
+        st.image("logo.png", width=90)
     with col_h2:
         st.markdown("""
         <div style='background-color: #002b5b; padding: 15px; border-radius: 12px; margin-bottom: 25px; border-bottom: 6px solid #cfa134; box-shadow: 0 4px 10px rgba(0,0,0,0.1);'>
-            <h1 style='color: #f4ecd8; margin: 0; font-family: "Helvetica Neue", sans-serif; font-weight: 700; font-size: 2rem;'>LUNARA | GESTÃO DE MOLDES</h1>
-            <p style='color: #cfa134; margin: 4px 0 0 0; font-size: 1rem;'>Área Protegida • Clique numa linha para Editar ou Apagar</p>
+            <h1 style='color: #f4ecd8; margin: 0; font-family: "Helvetica Neue", sans-serif; font-weight: 700; font-size: 1.8rem;'>LUNARA | GESTÃO DE MOLDES</h1>
+            <p style='color: #cfa134; margin: 4px 0 0 0; font-size: 0.95rem;'>Área Protegida • Clique diretamente numa linha para Editar ou Apagar</p>
         </div>
         """, unsafe_allow_html=True)
 else:
@@ -118,7 +109,7 @@ if st.sidebar.button("🔒 Sair do Painel (Log Out)"):
     st.session_state["autenticado"] = False
     st.rerun()
 
-# --- CARREGAR DADOS ---
+# --- CARREGAR DADOS HISTÓRICOS ---
 linhas = []
 conexao_ok = False
 try:
@@ -185,7 +176,7 @@ if submetido:
             st.rerun()
 
 with col2:
-    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px;'>📊 Histórico de Produção</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px;'>📊 Histórico de Production</h3>", unsafe_allow_html=True)
     
     dados_selecionados = None
     if conexao_ok:
