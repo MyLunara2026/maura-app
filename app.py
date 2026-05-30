@@ -37,15 +37,16 @@ div[data-testid="stDecoration"] { display: none !important; }
 /* Configuração de Cores Gerais do Painel Lunara */
 .stApp { background-color: #f4ecd8 !important; }
 
-/* SOLUÇÃO DE COR PRETA FINAL: 
-   O Streamlit usa -webkit-text-fill-color para trancar a cor cinzenta nas tags <p> dos labels.
-   Forçando esta regra para #000000, o texto fica com um preto nítido e legível sem deformar.
+/* AJUSTE DE TAMANHO E COR:
+   Definido para preto puro (#000000), mas com tamanho reduzido (0.95rem) e peso elegante (500).
+   Assim fica perfeitamente visível, mas discreto e profissional.
 */
 div[data-testid="stForm"] label p {
     color: #000000 !important;
     -webkit-text-fill-color: #000000 !important;
-    font-weight: 700 !important;
-    font-size: 1.1rem !important;
+    font-weight: 500 !important;
+    font-size: 0.95rem !important;
+    letter-spacing: 0.3px !important;
 }
 
 /* Bordas dos inputs */
@@ -96,7 +97,6 @@ if not st.session_state["autenticado"]:
                 data = f.read()
                 encoded = base64.b64encode(data).decode()
             
-            # Logótipo com os 220px bem definidos para preencher o espaço corretamente
             st.markdown(f"""
             <div class='logo-login-box'>
                 <img src='data:image/png;base64,{encoded}' style='width: 220px; height: auto;'>
@@ -218,7 +218,7 @@ if submetido:
             st.rerun()
 
 with col2:
-    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px; margin-bottom: 15px;'>📊 Histórico de Produção</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px; margin-bottom: 15px;'>📊 Histórico de Production</h3>", unsafe_allow_html=True)
     
     dados_selecionados = None
     if conexao_ok:
