@@ -19,39 +19,43 @@ HEADERS = {
 }
 
 # --- CONFIGURAÇÃO DA PÁGINA ---
-st.set_page_config(page_title="Maura | Production Pro", layout="wide", page_icon="🕯️")
+st.set_page_config(page_title="Maura | Produção Pro", layout="wide", page_icon="🕯️")
 
 # --- DESIGN PERSONALIZADO E CORREÇÕES VISUAIS ---
 st.markdown("""
 <style>
-/* Oculta os elementos nativos do topo e rodapé padrão */
+/* Oculta os elementos nativos do topo e rodapé padrão do Streamlit */
 header { visibility: hidden !important; height: 0px !important; }
 #MainMenu { visibility: hidden !important; }
 footer { visibility: hidden !important; }
 div[data-testid="stDecoration"] { display: none !important; }
 
-/* Elimina o espaço em branco exagerado no topo da página */
-.block-container { padding-top: 2rem !important; padding-bottom: 1rem !important; }
-
-/* Configuração de Cores Gerais do Painel Lunara */
+/* Configuração de Fundo do Painel Lunara */
 .stApp { background-color: #f4ecd8 !important; }
 
-/* Labels ("Utilizador" e "Palavra-passe") maiores e a negrito */
-div[data-testid="stWidgetLabel"] p { 
-    color: #002b5b !important; 
-    font-weight: bold !important; 
-    font-size: 1.2rem !important;
+/* AJUSTE FORTE: Labels ("Utilizador" e "Palavra-passe") Grandes, a Preto e Negrito */
+div[data-testid="stWidgetLabel"] p, 
+label[data-testid="stWidgetLabel"] p,
+div[data-testid="stWidgetLabel"] { 
+    color: #000000 !important; 
+    font-weight: 800 !important; 
+    font-size: 1.35rem !important;
     margin-bottom: 8px !important;
 }
 
-div[data-baseweb="input"], div[data-baseweb="number-input"] { border: 2px solid #cfa134 !important; border-radius: 6px !important; background-color: white !important; }
+/* Formatação das caixas de texto onde se escreve */
+div[data-baseweb="input"], div[data-baseweb="number-input"] { 
+    border: 2px solid #cfa134 !important; 
+    border-radius: 6px !important; 
+    background-color: white !important; 
+}
 
-/* ANULAÇÃO COMPLETA DE QUALQUER TEXTO DE AJUDA/INSTRUÇÃO (Press Enter...) */
+/* BLOQUEIO ABSOLUTO: Remove o "Press Enter to apply" ou "submit form" em qualquer estado */
 [data-testid="stInputInstructions"], 
 [data-testid="stWidgetInstructions"],
-div[class*="st-"] small,
 div[data-testid="stInputInstructions"] p,
 div[data-testid="stInputInstructions"] span,
+div[class*="st-"] small,
 .st-emotion-cache-1itdy7u,
 .st-emotion-cache-q3uqae,
 .st-emotion-cache-1m69n64 {
@@ -65,49 +69,49 @@ div[data-testid="stInputInstructions"] span,
     padding: 0 !important;
 }
 
-/* Caixa visual elegante para o Login */
+/* Caixa visual elegante para a Área de Login */
 .caixa-login-estilizada {
     border: 2px solid #002b5b !important;
     border-radius: 12px !important;
     padding: 25px !important;
     background-color: #fdfbf7 !important;
     box-shadow: 0 6px 15px rgba(0,0,0,0.05) !important;
-    margin-bottom: 20px !important;
+    margin-bottom: 25px !important;
 }
 
-/* Contentor para Centralizar o Logo e dar espaço de respiro */
+/* Contentor do Logo: Centralizado e afastado da caixa inferior */
 .logo-login-box {
     display: flex;
     justify-content: center;
     align-items: center;
     text-align: center;
     width: 100%;
-    margin-bottom: 30px; /* Dá espaço elegante até à caixa de texto */
+    margin-bottom: 35px !important; /* Espaço para não colar à caixa */
     margin-top: 10px;
 }
 
-/* Centralização Real do Botão de Login e Melhoria de Texto */
+/* Centralização Perfeita do Botão de Entrada */
 div.stButton {
     text-align: center !important;
     display: flex !important;
     justify-content: center !important;
+    width: 100% !important;
 }
 
 div.stButton > button[key="btn_login"] { 
     background-color: #002b5b !important; 
     color: #f4ecd8 !important; 
-    font-weight: 900 !important; /* Negrito ultra forte */
-    font-size: 1.05rem !important; /* Letra maior */
+    font-weight: bold !important;
+    font-size: 1.1rem !important;
     letter-spacing: 1px !important;
-    width: 60% !important; /* Não fica gigante para os lados, fica proporcional */
-    height: 3.2em; 
+    width: 50% !important; /* Largura proporcional e elegante */
+    height: 3.2em !important; 
     border-radius: 8px !important; 
     border: none !important;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15) !important;
-    transition: 0.3s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
 }
 
-/* Estilização dos restantes botões do painel interno */
+/* Botões do Painel Interno */
 div.stButton > button[key="btn_adicionar"] { width: 100%; background-color: #27ae60 !important; color: white !important; border-radius: 6px !important; height: 3.2em; font-weight: bold !important; border: none !important; }
 div.stButton > button[key="btn_guardar_edicao"] { width: 100%; background-color: #2980b9 !important; color: white !important; border-radius: 6px !important; height: 3.2em; font-weight: bold !important; border: none !important; }
 div.stButton > button[key="btn_eliminar_direto"] { width: 100%; background-color: #c0392b !important; color: white !important; border-radius: 6px !important; height: 3.2em; font-weight: bold !important; border: none !important; }
@@ -131,7 +135,7 @@ if not st.session_state["autenticado"]:
             
             st.markdown(f"""
             <div class='logo-login-box'>
-                <img src='data:image/png;base64,{encoded}' style='width: 140px; height: auto;'>
+                <img src='data:image/png;base64,{encoded}' style='width: 145px; height: auto;'>
             </div>
             """, unsafe_allow_html=True)
         
@@ -147,7 +151,7 @@ if not st.session_state["autenticado"]:
         usuario_input = st.text_input("Utilizador", key="input_user")
         senha_input = st.text_input("Palavra-passe", type="password", key="input_pass")
         
-        st.write("") # Pequeno espaço antes do botão
+        st.write("") # Pequeno espaço estético
         botao_entrar = st.button("ENTRAR NO PAINEL", key="btn_login")
         
         if botao_entrar:
@@ -253,7 +257,7 @@ if submetido:
             st.rerun()
 
 with col2:
-    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px; margin-bottom: 15px;'>📊 Histórico de Produção</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px; margin-bottom: 15px;'>📊 Histórico de Production</h3>", unsafe_allow_html=True)
     
     dados_selecionados = None
     if conexao_ok:
@@ -273,7 +277,7 @@ with col2:
             
             linhas_clicadas = selecao.get("selection", {}).get("rows", [])
             if linhas_clicadas:
-                index_clicado = linhas_clicadas[0]
+                index_clicado = lines_clicadas[0]
                 dados_selecionados = linhas[index_clicado]
             
             st.write("")
