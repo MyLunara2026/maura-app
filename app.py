@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import requests
+import os
 
 # --- CONFIGURAÇÕES DA BASE DE DADOS (SUPABASE) ---
 try:
@@ -18,7 +19,7 @@ HEADERS = {
 }
 
 # --- CONFIGURAÇÃO DA PÁGINA ---
-st.set_page_config(page_title="Maura | Produção Pro", layout="wide", page_icon="💎")
+st.set_page_config(page_title="Maura | Produção Pro", layout="wide", page_icon="🕯️")
 
 # --- DESIGN PERSONALIZADO EM BEGE, AZUL E OURO ---
 st.markdown("""
@@ -27,6 +28,10 @@ st.markdown("""
 div[data-testid="stWidgetLabel"] p { color: #002b5b !important; font-weight: bold !important; }
 div[data-baseweb="input"], div[data-baseweb="number-input"] { border: 2px solid #cfa134 !important; border-radius: 6px !important; background-color: white !important; }
 div[data-testid="stForm"] { border: 2px solid #002b5b !important; border-radius: 12px !important; padding: 25px !important; background-color: #fdfbf7 !important; box-shadow: 0 6px 15px rgba(0,0,0,0.05) !important; }
+
+/* Estilo para centralizar o logo no login */
+.logo-login-container { display: flex; justify-content: center; margin-bottom: 20px; }
+.logo-login { max-width: 150px; border-radius: 50%; border: 3px solid #cfa134; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
 
 /* Botão ADICIONAR (Verde) */
 div.stButton > button[key="btn_adicionar"] { width: 100%; background-color: #27ae60 !important; color: white !important; border-radius: 6px !important; height: 3.2em; font-weight: bold !important; border: none !important; }
@@ -47,18 +52,30 @@ if "autenticado" not in st.session_state:
     st.session_state["autenticado"] = False
 
 if not st.session_state["autenticado"]:
-    # Ecrã de Login Centralizado
     st.write("")
     st.write("")
     col_l1, col_l2, col_l3 = st.columns([1, 1.2, 1])
     
     with col_l2:
-        st.markdown("""
-        <div style='background-color: #002b5b; padding: 20px; border-radius: 12px; border-bottom: 4px solid #cfa134; text-align: center; margin-bottom: 20px;'>
-            <h2 style='color: #f4ecd8; margin: 0; font-family: sans-serif;'>💎 Acesso Restrito</h2>
-            <p style='color: #cfa134; margin: 5px 0 0 0;'>Introduza as suas credenciais Lunara</p>
-        </div>
-        """, unsafe_allow_html=True)
+        # Tenta carregar o logo para a tela de login, se não existir usa a vela de segurança
+        if os.path.exists("logo.png"):
+            st.write("<div class='logo-login-container'>", unsafe_allow_html=True)
+            st.image("logo.png", width=140)
+            st.write("</div>", unsafe_allow_html=True)
+            
+            st.markdown("""
+            <div style='background-color: #002b5b; padding: 15px; border-radius: 12px; border-bottom: 4px solid #cfa134; text-align: center; margin-bottom: 20px;'>
+                <h2 style='color: #f4ecd8; margin: 0; font-family: sans-serif; font-size: 1.6rem;'>Acesso Restrito</h2>
+                <p style='color: #cfa134; margin: 5px 0 0 0;'>Introduza as suas credenciais Lunara</p>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown("""
+            <div style='background-color: #002b5b; padding: 20px; border-radius: 12px; border-bottom: 4px solid #cfa134; text-align: center; margin-bottom: 20px;'>
+                <h2 style='color: #f4ecd8; margin: 0; font-family: sans-serif;'>▲ Acesso Restrito</h2>
+                <p style='color: #cfa134; margin: 5px 0 0 0;'>Introduza as suas credenciais Lunara</p>
+            </div>
+            """, unsafe_allow_html=True)
         
         with st.form("form_login"):
             usuario_input = st.text_input("Utilizador")
@@ -66,35 +83,42 @@ if not st.session_state["autenticado"]:
             botao_entrar = st.form_submit_button("ENTRAR NO PAINEL", key="btn_login")
             
             if botao_entrar:
-                # Altera aqui os teus dados de acesso se quiseres algo mais complexo:
-                if usuario_input == "lunara2026" and senha_input == "220415F&M":
+                if usuario_input == "maura" and senha_input == "lunara2026":
                     st.session_state["autenticado"] = True
                     st.rerun()
                 else:
                     st.error("Credenciais incorretas. Tente novamente.")
-    st.stop() # Bloqueia o resto do código se não estiver logado
+    st.stop()
 
 # =====================================================================
-# --- A PARTIR DAQUI SÓ ENTRA QUEM FIZER LOGIN COM SUCESSO ---
+# --- ÁREA PRIVADA (APÓS LOGIN) ---
 # =====================================================================
 
-# Cabeçalho da Lunara
-st.markdown("""
-<div style='background-color: #002b5b; padding: 25px; border-radius: 12px; margin-bottom: 25px; border-bottom: 6px solid #cfa134; box-shadow: 0 4px 10px rgba(0,0,0,0.1);'>
-    <div style='float: right;'>
-        <form action='javascript:void(0);'></form>
+# Cabeçalho adaptável com ou sem imagem de Logótipo
+if os.path.exists("logo.png"):
+    col_h1, col_h2 = st.columns([1, 5])
+    with col_h1:
+        st.image("logo.png", width=100)
+    with col_h2:
+        st.markdown("""
+        <div style='background-color: #002b5b; padding: 15px; border-radius: 12px; margin-bottom: 25px; border-bottom: 6px solid #cfa134; box-shadow: 0 4px 10px rgba(0,0,0,0.1);'>
+            <h1 style='color: #f4ecd8; margin: 0; font-family: "Helvetica Neue", sans-serif; font-weight: 700; font-size: 2rem;'>LUNARA | GESTÃO DE MOLDES</h1>
+            <p style='color: #cfa134; margin: 4px 0 0 0; font-size: 1rem;'>Área Protegida • Clique numa linha para Editar ou Apagar</p>
+        </div>
+        """, unsafe_allow_html=True)
+else:
+    st.markdown("""
+    <div style='background-color: #002b5b; padding: 25px; border-radius: 12px; margin-bottom: 25px; border-bottom: 6px solid #cfa134; box-shadow: 0 4px 10px rgba(0,0,0,0.1);'>
+        <h1 style='color: #f4ecd8; margin: 0; font-family: "Helvetica Neue", sans-serif; font-weight: 700; text-align: center;'>GESTÃO DE MOLDES: GESSO & CERA</h1>
+        <p style='color: #cfa134; margin: 6px 0 0 0; font-size: 1.1rem; font-weight: 500; text-align: center;'>Área Protegida • Clique diretamente numa linha da tabela para Editar ou Apagar</p>
     </div>
-    <h1 style='color: #f4ecd8; margin: 0; font-family: "Helvetica Neue", sans-serif; font-weight: 700; text-align: center;'>GESTÃO DE MOLDES: GESSO & CERA</h1>
-    <p style='color: #cfa134; margin: 6px 0 0 0; font-size: 1.1rem; font-weight: 500; text-align: center;'>Área Protegida • Clique diretamente numa linha da tabela para Editar ou Apagar</p>
-</div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
-# Botão de Log Out discreto no topo lateral direito
 if st.sidebar.button("🔒 Sair do Painel (Log Out)"):
     st.session_state["autenticado"] = False
     st.rerun()
 
-# --- CARREGAR DADOS HISTÓRICOS ---
+# --- CARREGAR DADOS ---
 linhas = []
 conexao_ok = False
 try:
