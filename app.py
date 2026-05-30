@@ -3,6 +3,7 @@ import pandas as pd
 import requests
 import os
 import base64
+import time
 
 # --- CONFIGURAÇÕES DA BASE DE DADOS (SUPABASE) ---
 try:
@@ -20,7 +21,7 @@ HEADERS = {
 }
 
 # --- CONFIGURAÇÃO DA PÁGINA ---
-st.set_page_config(page_title="Maura | Production Pro", layout="wide", page_icon="🕯️")
+st.set_page_config(page_title="Maura | Produção Pro", layout="wide", page_icon="🕯️")
 
 # --- DESIGN PERSONALIZADO (CABEÇALHO NO TOPO E CORES) ---
 st.markdown("""
@@ -112,7 +113,6 @@ if not st.session_state["autenticado"]:
         """, unsafe_allow_html=True)
         
         with st.form("form_login"):
-            # Rótulos manuais HTML estáveis com visibilidade oculta no componente nativo
             st.markdown('<div class="label-custom-login">Utilizador</div>', unsafe_allow_html=True)
             usuario_input = st.text_input("Utilizador", label_visibility="collapsed")
             
@@ -217,7 +217,8 @@ if submetido:
         try:
             res = requests.post(f"{SUPABASE_URL}/rest/v1/moldes", json=dados_novos, headers=HEADERS)
             if res.status_code in [200, 201, 204]:
-                st.success(f"Molde '{molde}' adicionado!")
+                st.toast("✅ Novo registo adicionado com sucesso!")
+                time.sleep(1)
                 st.rerun()
         except:
             st.rerun()
@@ -291,7 +292,8 @@ with col2:
                             try:
                                 res_put = requests.patch(f"{SUPABASE_URL}/rest/v1/moldes?id=eq.{dados_selecionados['id']}", json=dados_atualizados, headers=HEADERS)
                                 if res_put.status_code in [200, 204]:
-                                    st.success("Atualizado!")
+                                    st.toast("💾 Alterações guardadas com sucesso!")
+                                    time.sleep(1)
                                     st.rerun()
                             except:
                                 st.rerun()
@@ -301,7 +303,8 @@ with col2:
                             try:
                                 res_del = requests.delete(f"{SUPABASE_URL}/rest/v1/moldes?id=eq.{dados_selecionados['id']}", headers=HEADERS)
                                 if res_del.status_code in [200, 204]:
-                                    st.success("Eliminado!")
+                                    st.toast("🗑️ Registo eliminado com sucesso!")
+                                    time.sleep(1)
                                     st.rerun()
                             except:
                                 st.rerun()
