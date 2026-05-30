@@ -19,7 +19,7 @@ HEADERS = {
 }
 
 # --- CONFIGURAÇÃO DA PÁGINA ---
-st.set_page_config(page_title="Maura | Produção Pro", layout="wide", page_icon="🕯️")
+st.set_page_config(page_title="Maura | Production Pro", layout="wide", page_icon="🕯️")
 
 # --- DESIGN PERSONALIZADO E CORREÇÕES VISUAIS ---
 st.markdown("""
@@ -31,32 +31,30 @@ footer { visibility: hidden !important; }
 div[data-testid="stDecoration"] { display: none !important; }
 
 /* Elimina o espaço em branco exagerado no topo da página */
-.block-container { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+.block-container { padding-top: 2rem !important; padding-bottom: 1rem !important; }
 
 /* Configuração de Cores Gerais do Painel Lunara */
 .stApp { background-color: #f4ecd8 !important; }
 
-/* REFORÇO: Labels ("Utilizador", "Palavra-passe", etc.) maiores e a negrito */
-div[data-testid="stWidgetLabel"] p, 
-label[data-testid="stWidgetLabel"] p,
-div[data-testid="stWidgetLabel"] { 
+/* Labels ("Utilizador" e "Palavra-passe") maiores e a negrito */
+div[data-testid="stWidgetLabel"] p { 
     color: #002b5b !important; 
     font-weight: bold !important; 
-    font-size: 1.15rem !important;
-    margin-bottom: 6px !important;
+    font-size: 1.2rem !important;
+    margin-bottom: 8px !important;
 }
 
 div[data-baseweb="input"], div[data-baseweb="number-input"] { border: 2px solid #cfa134 !important; border-radius: 6px !important; background-color: white !important; }
 
-/* ATAQUE TOTAL AO TEXTO TEIMOSO: Bloqueia "Press Enter to..." em qualquer div, classe ou cache do Streamlit */
+/* ANULAÇÃO COMPLETA DE QUALQUER TEXTO DE AJUDA/INSTRUÇÃO (Press Enter...) */
 [data-testid="stInputInstructions"], 
 [data-testid="stWidgetInstructions"],
-div[data-testid="stInputInstructions"] p, 
+div[class*="st-"] small,
+div[data-testid="stInputInstructions"] p,
 div[data-testid="stInputInstructions"] span,
-div[data-testid="stWidgetInstructions"] p,
-div[data-testid="stWidgetInstructions"] span,
 .st-emotion-cache-1itdy7u,
-.st-emotion-cache-q3uqae {
+.st-emotion-cache-q3uqae,
+.st-emotion-cache-1m69n64 {
     display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;
@@ -65,38 +63,55 @@ div[data-testid="stWidgetInstructions"] span,
     line-height: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
-    pointer-events: none !important;
 }
 
-/* Caixa visual elegante para o Login (Ajustada para subir mais no ecrã) */
+/* Caixa visual elegante para o Login */
 .caixa-login-estilizada {
     border: 2px solid #002b5b !important;
     border-radius: 12px !important;
     padding: 25px !important;
     background-color: #fdfbf7 !important;
     box-shadow: 0 6px 15px rgba(0,0,0,0.05) !important;
-    margin-top: -20px !important; /* Puxa a caixa para cima */
+    margin-bottom: 20px !important;
 }
 
-/* Estilização exclusiva do formulário de trabalho interno */
-div[data-testid="stColumn"] div[data-testid="stForm"] { border: 2px solid #002b5b !important; border-radius: 12px !important; padding: 25px !important; background-color: #fdfbf7 !important; box-shadow: 0 6px 15px rgba(0,0,0,0.05) !important; }
-
-/* Contentor para Centralizar o Logo no Login */
+/* Contentor para Centralizar o Logo e dar espaço de respiro */
 .logo-login-box {
     display: flex;
     justify-content: center;
     align-items: center;
     text-align: center;
     width: 100%;
-    margin-bottom: 10px;
-    margin-top: -10px; /* Puxa o logo também ligeiramente para cima */
+    margin-bottom: 30px; /* Dá espaço elegante até à caixa de texto */
+    margin-top: 10px;
 }
 
-/* Botões Customizados */
+/* Centralização Real do Botão de Login e Melhoria de Texto */
+div.stButton {
+    text-align: center !important;
+    display: flex !important;
+    justify-content: center !important;
+}
+
+div.stButton > button[key="btn_login"] { 
+    background-color: #002b5b !important; 
+    color: #f4ecd8 !important; 
+    font-weight: 900 !important; /* Negrito ultra forte */
+    font-size: 1.05rem !important; /* Letra maior */
+    letter-spacing: 1px !important;
+    width: 60% !important; /* Não fica gigante para os lados, fica proporcional */
+    height: 3.2em; 
+    border-radius: 8px !important; 
+    border: none !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15) !important;
+    transition: 0.3s;
+}
+
+/* Estilização dos restantes botões do painel interno */
 div.stButton > button[key="btn_adicionar"] { width: 100%; background-color: #27ae60 !important; color: white !important; border-radius: 6px !important; height: 3.2em; font-weight: bold !important; border: none !important; }
 div.stButton > button[key="btn_guardar_edicao"] { width: 100%; background-color: #2980b9 !important; color: white !important; border-radius: 6px !important; height: 3.2em; font-weight: bold !important; border: none !important; }
 div.stButton > button[key="btn_eliminar_direto"] { width: 100%; background-color: #c0392b !important; color: white !important; border-radius: 6px !important; height: 3.2em; font-weight: bold !important; border: none !important; }
-div.stButton > button[key="btn_login"] { background-color: #002b5b !important; color: white !important; font-weight: bold !important; width: 100%; height: 3em; border-radius: 6px !important; }
+div[data-testid="stColumn"] div[data-testid="stForm"] { border: 2px solid #002b5b !important; border-radius: 12px !important; padding: 25px !important; background-color: #fdfbf7 !important; box-shadow: 0 6px 15px rgba(0,0,0,0.05) !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -105,8 +120,7 @@ if "autenticado" not in st.session_state:
     st.session_state["autenticado"] = False
 
 if not st.session_state["autenticado"]:
-    # Removido os st.write vazios para a caixa poder subir naturalmente no ecrã
-    col_l1, col_l2, col_l3 = st.columns([1, 1.1, 1])
+    col_l1, col_l2, col_l3 = st.columns([1, 1.2, 1])
     
     with col_l2:
         if os.path.exists("logo.png"):
@@ -121,18 +135,19 @@ if not st.session_state["autenticado"]:
             </div>
             """, unsafe_allow_html=True)
         
-        # Estrutura visual elegante e limpa
         st.markdown("""
         <div class="caixa-login-estilizada">
-            <div style='text-align: center; margin-bottom: 15px;'>
-                <h3 style='color: #002b5b; margin: 0; font-family: sans-serif; font-size: 1.6rem;'>Área de Login</h3>
-                <p style='color: #7f8c8d; margin: 4px 0 0 0; font-size: 0.95rem;'>Introduza as suas credenciais de acesso</p>
+            <div style='text-align: center;'>
+                <h2 style='color: #002b5b; margin: 0; font-family: sans-serif; font-size: 1.8rem; font-weight: bold;'>Área de Login</h2>
+                <p style='color: #7f8c8d; margin: 6px 0 0 0; font-size: 0.95rem;'>Introduza as suas credenciais de acesso</p>
             </div>
         </div>
         """, unsafe_allow_html=True)
         
-        usuario_input = st.text_input("Utilizador")
-        senha_input = st.text_input("Palavra-passe", type="password")
+        usuario_input = st.text_input("Utilizador", key="input_user")
+        senha_input = st.text_input("Palavra-passe", type="password", key="input_pass")
+        
+        st.write("") # Pequeno espaço antes do botão
         botao_entrar = st.button("ENTRAR NO PAINEL", key="btn_login")
         
         if botao_entrar:
@@ -147,7 +162,7 @@ if not st.session_state["autenticado"]:
 # --- ÁREA PRIVADA (APÓS LOGIN) ---
 # =====================================================================
 
-# Cabeçalho da Área de Trabalho com o texto explicativo correto
+# Cabeçalho da Área de Trabalho
 if os.path.exists("logo.png"):
     col_h1, col_h2 = st.columns([1, 6.5])
     with col_h1:
