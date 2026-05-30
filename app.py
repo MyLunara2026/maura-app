@@ -37,13 +37,7 @@ div[data-testid="stDecoration"] { display: none !important; }
 /* Configuração de Cores Gerais do Painel Lunara */
 .stApp { background-color: #f4ecd8 !important; }
 
-/* CORREÇÃO CORRETA E LIMPA: Aplica o preto nítido e elegante diretamente na div do label */
-div[data-testid="stWidgetLabel"] label { 
-    color: #000000 !important; 
-    font-weight: 600 !important; 
-    font-size: 1.1rem !important;
-}
-
+/* Bordas dos inputs */
 div[data-baseweb="input"], div[data-baseweb="number-input"] { border: 2px solid #cfa134 !important; border-radius: 6px !important; background-color: white !important; }
 
 /* Estilização exclusiva do formulário de trabalho interno */
@@ -106,8 +100,11 @@ if not st.session_state["autenticado"]:
         """, unsafe_allow_html=True)
         
         with st.form("form_login"):
-            usuario_input = st.text_input("Utilizador")
-            senha_input = st.text_input("Palavra-passe", type="password")
+            # SOLUÇÃO INTACTA: HTML Inline injetado diretamente nos títulos para forçar a cor e o estilo corretos sem falhas!
+            usuario_input = st.text_input(label="Utilizador", label_visibility="visible")
+            st.markdown('<style>div[data-testid="stWidgetLabel"] label p { color: #000000 !important; font-weight: 700 !important; font-size: 1.1rem !important; }</style>', unsafe_allow_html=True)
+            
+            senha_input = st.text_input(label="Palavra-passe", type="password", label_visibility="visible")
             
             st.markdown('<div class="div-botao-central">', unsafe_allow_html=True)
             botao_entrar = st.form_submit_button("ENTRAR NO PAINEL", key="btn_login")
