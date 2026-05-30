@@ -89,7 +89,7 @@ if not st.session_state["autenticado"]:
             botao_entrar = st.form_submit_button("ENTRAR NO PAINEL", key="btn_login")
             
             if botao_entrar:
-                if usuario_input == "maura" and senha_input == "lunara2026":
+                if usuario_input == "lunara2026" and senha_input == "220415F&M":
                     st.session_state["autenticado"] = True
                     st.rerun()
                 else:
