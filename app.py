@@ -2,7 +2,31 @@ import streamlit as st
 import pandas as pd
 import requests
 import os
+import base64
 
+# 1. Configurações da página
+st.set_page_config(page_title="Maura | Produção Pro", layout="wide", page_icon="🕯️")
+
+# 2. COLOCA AQUI O BLOCO DE CSS (este é o "início" que referiste)
+st.markdown("""
+<style>
+/* Oculta elementos nativos */
+header { visibility: hidden !important; }
+[data-testid="stInputInstructions"] { display: none !important; }
+.stApp { background-color: #f4ecd8 !important; }
+
+/* Regra para centrar o botão teimoso */
+.div-botao-central { 
+    display: flex !important; 
+    justify-content: center !important; 
+    width: 100% !important; 
+    margin-top: 20px !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# 3. Resto do teu código (Configurações do Supabase, Lógica de Login, Tabelas, etc.)
+# ...
 # --- CONFIGURAÇÕES DA BASE DE DADOS (SUPABASE) ---
 try:
     SUPABASE_URL = st.secrets["SUPABASE_URL"]
