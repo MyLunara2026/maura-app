@@ -38,7 +38,14 @@ div[data-testid="stDecoration"] { display: none !important; }
 div[data-testid="stWidgetLabel"] p { color: #002b5b !important; font-weight: bold !important; }
 div[data-baseweb="input"], div[data-baseweb="number-input"] { border: 2px solid #cfa134 !important; border-radius: 6px !important; background-color: white !important; }
 
-/* Caixa visual elegante para o Login (substitui o st.form) */
+/* REFORÇO MÁXIMO: Oculta as instruções mesmo quando se escreve nos campos */
+div[data-testid="stInputInstructions"] {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0px !important;
+}
+
+/* Caixa visual elegante para o Login */
 .caixa-login-estilizada {
     border: 2px solid #002b5b !important;
     border-radius: 12px !important;
@@ -90,7 +97,6 @@ if not st.session_state["autenticado"]:
             </div>
             """, unsafe_allow_html=True)
         
-        # Criamos a estrutura visual idêntica, mas SEM usar st.form (adeus texto em inglês!)
         st.markdown("""
         <div class="caixa-login-estilizada">
             <div style='text-align: center; margin-bottom: 15px;'>
@@ -100,7 +106,6 @@ if not st.session_state["autenticado"]:
         </div>
         """, unsafe_allow_html=True)
         
-        # Os campos ficam logo abaixo da moldura estruturada de forma limpa
         usuario_input = st.text_input("Utilizador")
         senha_input = st.text_input("Palavra-passe", type="password")
         botao_entrar = st.button("ENTRAR NO PAINEL", key="btn_login")
@@ -208,7 +213,7 @@ if submetido:
             st.rerun()
 
 with col2:
-    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px; margin-bottom: 15px;'>📊 Histórico de Production</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px; margin-bottom: 15px;'>📊 Histórico de Produção</h3>", unsafe_allow_html=True)
     
     dados_selecionados = None
     if conexao_ok:
