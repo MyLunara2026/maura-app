@@ -21,22 +21,30 @@ HEADERS = {
 # --- CONFIGURAÇÃO DA PÁGINA ---
 st.set_page_config(page_title="Maura | Produção Pro", layout="wide", page_icon="🕯️")
 
-# --- DESIGN PERSONALIZADO (OCULTA BARRA DO TOPO E ESTILIZA O PAINEL) ---
+# --- DESIGN PERSONALIZADO (REMOÇÃO DE BARRAS E AJUSTE DE ESPAÇOS) ---
 st.markdown("""
 <style>
-/* Remove a barra superior do Streamlit e o menu padrão */
+/* Remove completamente a barra do topo, o menu e o rodapé */
 header { visibility: hidden !important; height: 0px !important; }
 #MainMenu { visibility: hidden !important; }
 footer { visibility: hidden !important; }
 div[data-testid="stDecoration"] { display: none !important; }
 
-/* Configuração de Cores da Aplicação */
+/* Remove o botão preto 'Gerenciar aplicativo' no canto inferior direito */
+div[data-testid="stViewerBadge"] { display: none !important; }
+iframe[title="Managed Hosting Badge"] { display: none !important; }
+.stViewerBadge { display: none !important; }
+
+/* Elimina o espaço em branco exagerado no topo da página */
+.block-container { padding-top: 1.5rem !important; padding-bottom: 1rem !important; }
+
+/* Configuração de Cores Gerais */
 .stApp { background-color: #f4ecd8 !important; }
 div[data-testid="stWidgetLabel"] p { color: #002b5b !important; font-weight: bold !important; }
 div[data-baseweb="input"], div[data-baseweb="number-input"] { border: 2px solid #cfa134 !important; border-radius: 6px !important; background-color: white !important; }
 div[data-testid="stForm"] { border: 2px solid #002b5b !important; border-radius: 12px !important; padding: 25px !important; background-color: #fdfbf7 !important; box-shadow: 0 6px 15px rgba(0,0,0,0.05) !important; }
 
-/* Contentor de Centralização Absoluta do Logo */
+/* Contentor de Centralização Absoluta do Logo no Login */
 .logo-login-box {
     display: flex;
     justify-content: center;
@@ -64,7 +72,6 @@ if not st.session_state["autenticado"]:
     col_l1, col_l2, col_l3 = st.columns([1, 1.2, 1])
     
     with col_l2:
-        # Apresentação do Logo Centralizado se o ficheiro existir
         if os.path.exists("logo.png"):
             import base64
             with open("logo.png", "rb") as f:
@@ -90,7 +97,7 @@ if not st.session_state["autenticado"]:
             botao_entrar = st.form_submit_button("ENTRAR NO PAINEL", key="btn_login")
             
             if botao_entrar:
-                # Validação com os novos dados de acesso solicitados
+                # Credenciais atualizadas conforme o teu pedido anterior
                 if usuario_input == "lunara2026" and senha_input == "220415F&M":
                     st.session_state["autenticado"] = True
                     st.rerun()
@@ -102,22 +109,23 @@ if not st.session_state["autenticado"]:
 # --- ÁREA PRIVADA (APÓS LOGIN) ---
 # =====================================================================
 
+# Cabeçalho perfeitamente alinhado no topo e com texto centralizado
 if os.path.exists("logo.png"):
-    col_h1, col_h2 = st.columns([1, 6])
+    col_h1, col_h2 = st.columns([1, 6.5])
     with col_h1:
-        st.image("logo.png", width=90)
+        st.image("logo.png", width=95)
     with col_h2:
         st.markdown("""
-        <div style='background-color: #002b5b; padding: 15px; border-radius: 12px; margin-bottom: 25px; border-bottom: 6px solid #cfa134; box-shadow: 0 4px 10px rgba(0,0,0,0.1);'>
-            <h1 style='color: #f4ecd8; margin: 0; font-family: "Helvetica Neue", sans-serif; font-weight: 700; font-size: 1.8rem;'>LUNARA | GESTÃO DE MOLDES</h1>
-            <p style='color: #cfa134; margin: 4px 0 0 0; font-size: 0.95rem;'>Área Protegida • Clique diretamente numa linha para Editar ou Apagar</p>
+        <div style='background-color: #002b5b; padding: 18px; border-radius: 12px; margin-bottom: 20px; border-bottom: 6px solid #cfa134; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center;'>
+            <h1 style='color: #f4ecd8; margin: 0; font-family: "Helvetica Neue", sans-serif; font-weight: 700; font-size: 1.9rem; letter-spacing: 1px;'>LUNARA | GESTÃO DE MOLDES</h1>
+            <p style='color: #cfa134; margin: 5px 0 0 0; font-size: 0.95rem; font-weight: 500;'>Área Protegida • Clique diretamente numa linha para Editar ou Apagar</p>
         </div>
         """, unsafe_allow_html=True)
 else:
     st.markdown("""
-    <div style='background-color: #002b5b; padding: 25px; border-radius: 12px; margin-bottom: 25px; border-bottom: 6px solid #cfa134; box-shadow: 0 4px 10px rgba(0,0,0,0.1);'>
-        <h1 style='color: #f4ecd8; margin: 0; font-family: "Helvetica Neue", sans-serif; font-weight: 700; text-align: center;'>GESTÃO DE MOLDES: GESSO & CERA</h1>
-        <p style='color: #cfa134; margin: 6px 0 0 0; font-size: 1.1rem; font-weight: 500; text-align: center;'>Área Protegida • Clique diretamente numa linha da tabela para Editar ou Apagar</p>
+    <div style='background-color: #002b5b; padding: 22px; border-radius: 12px; margin-bottom: 20px; border-bottom: 6px solid #cfa134; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center;'>
+        <h1 style='color: #f4ecd8; margin: 0; font-family: "Helvetica Neue", sans-serif; font-weight: 700; font-size: 1.9rem;'>LUNARA | GESTÃO DE MOLDES</h1>
+        <p style='color: #cfa134; margin: 5px 0 0 0; font-size: 0.95rem; font-weight: 500;'>Área Protegida • Clique diretamente numa linha da tabela para Editar ou Apagar</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -139,7 +147,7 @@ except:
 col1, col2 = st.columns([1, 1.4], gap="large")
 
 with col1:
-    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #cfa134; padding-left: 10px;'>📋 Formulário de Trabalho</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #cfa134; padding-left: 10px; margin-bottom: 15px;'>📋 Formulário de Trabalho</h3>", unsafe_allow_html=True)
     
     with st.form("formulario_molde", clear_on_submit=True):
         molde = st.text_input("Nome do Molde", placeholder="Ex: Jarra Tulipa")
@@ -192,7 +200,7 @@ if submetido:
             st.rerun()
 
 with col2:
-    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px;'>📊 Histórico de Produção</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px; margin-bottom: 15px;'>📊 Histórico de Produção</h3>", unsafe_allow_html=True)
     
     dados_selecionados = None
     if conexao_ok:
@@ -239,7 +247,7 @@ with col2:
                             c_ge_ed = (ge_ed * 7.49) / 1000
                             g_cera_ed, c_ce_ed = 0.0, 0.0
                         else:
-                            ag_ed = Float(novo_vol / 2)
+                            ag_ed = novo_vol / 2
                             ge_ed = ag_ed * 2.5
                             c_ge_ed = (ge_ed * 7.49) / 1000
                             c_ce_ed = (g_cera_ed * 17.50) / 2000
