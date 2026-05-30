@@ -37,18 +37,14 @@ div[data-testid="stDecoration"] { display: none !important; }
 /* Configuração de Cores Gerais do Painel Lunara */
 .stApp { background-color: #f4ecd8 !important; }
 
-/* CORREÇÃO DEFINITIVA DA FONTE:
-   Focado diretamente no elemento de texto do widget de input.
-   Removido o preenchimento webkit que quebrava a suavização e adicionada a suavização de fontes nativa.
-*/
-div[data-testid="stWidgetLabel"] label p {
-    color: #111111 !important;
-    -webkit-text-fill-color: initial !important; /* Liberta o preenchimento artificial */
-    font-weight: 600 !important;
+/* Estilização dos nossos títulos manuais para ficarem perfeitos, pretos e finos */
+.label-custom-login {
+    color: #000000 !important;
+    font-weight: 500 !important;
     font-size: 0.95rem !important;
-    font-family: inherit !important; /* Mantém a fonte elegante original do sistema */
-    -webkit-font-smoothing: antialiased !important; /* Força nitidez limpa */
-    -moz-osx-font-smoothing: grayscale !important;
+    margin-bottom: 5px !important;
+    margin-top: 10px !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
 }
 
 /* Bordas dos inputs */
@@ -113,8 +109,12 @@ if not st.session_state["autenticado"]:
         """, unsafe_allow_html=True)
         
         with st.form("form_login"):
-            usuario_input = st.text_input("Utilizador")
-            senha_input = st.text_input("Palavra-passe", type="password")
+            # SOLUÇÃO REAL: Criamos o título em HTML limpo e ocultamos o do Streamlit para evitar bugs
+            st.markdown('<div class="label-custom-login">Utilizador</div>', unsafe_allow_html=True)
+            usuario_input = st.text_input("Utilizador", label_visibility="collapsed")
+            
+            st.markdown('<div class="label-custom-login">Palavra-passe</div>', unsafe_allow_html=True)
+            senha_input = st.text_input("Palavra-passe", type="password", label_visibility="collapsed")
             
             st.markdown('<div class="div-botao-central">', unsafe_allow_html=True)
             botao_entrar = st.form_submit_button("ENTRAR NO PAINEL", key="btn_login")
@@ -257,7 +257,7 @@ with col2:
                     
                     with c_ed2:
                         tipo_rec = "Sem Tampa" if "Sem Tampa" in novo_nome else "Molde"
-                        g_cera_ed = width_vol = novo_vol * 0.89 if tipo_rec == "Molde" else novo_vol * 0.86
+                        g_cera_ed = novo_vol * 0.89 if tipo_rec == "Molde" else novo_vol * 0.86
                         
                         if novo_tipo == "Cera":
                             ag_ed, ge_ed, c_ge_ed = 0.0, 0.0, 0.0
