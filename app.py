@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import requests
 import os
-import streamlit.components.v1 as components
 
 # --- CONFIGURAÇÕES DA BASE DE DADOS (SUPABASE) ---
 try:
@@ -22,59 +21,41 @@ HEADERS = {
 # --- CONFIGURAÇÃO DA PÁGINA ---
 st.set_page_config(page_title="Maura | Produção Pro", layout="wide", page_icon="🕯️")
 
-# --- DESATIVAR COMPLETAMENTE AS BARRAS E O BOTÃO PRETO ---
-# CSS para ocultar elementos visíveis normais e puxar o cabeçalho para o topo
+# --- DESIGN PERSONALIZADO (CABEÇALHO NO TOPO E CORES) ---
 st.markdown("""
 <style>
-header, footer { visibility: hidden !important; height: 0px !important; }
+/* Oculta os elementos nativos do topo e rodapé padrão */
+header { visibility: hidden !important; height: 0px !important; }
 #MainMenu { visibility: hidden !important; }
+footer { visibility: hidden !important; }
 div[data-testid="stDecoration"] { display: none !important; }
+
+/* Elimina o espaço em branco exagerado no topo da página */
 .block-container { padding-top: 1.5rem !important; padding-bottom: 1rem !important; }
 
-/* Cores e Estilos Gerais */
+/* Configuração de Cores Gerais do Painel Lunara */
 .stApp { background-color: #f4ecd8 !important; }
 div[data-testid="stWidgetLabel"] p { color: #002b5b !important; font-weight: bold !important; }
 div[data-baseweb="input"], div[data-baseweb="number-input"] { border: 2px solid #cfa134 !important; border-radius: 6px !important; background-color: white !important; }
 div[data-testid="stForm"] { border: 2px solid #002b5b !important; border-radius: 12px !important; padding: 25px !important; background-color: #fdfbf7 !important; box-shadow: 0 6px 15px rgba(0,0,0,0.05) !important; }
 
-/* Centralização do Logo no Login */
-.logo-login-box { display: flex; justify-content: center; align-items: center; text-align: center; width: 100%; margin-bottom: 25px; }
+/* Contentor para Centralizar o Logo no Login */
+.logo-login-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    margin-bottom: 25px;
+}
 
-/* Estilização dos Botões */
+/* Botões Customizados */
 div.stButton > button[key="btn_adicionar"] { width: 100%; background-color: #27ae60 !important; color: white !important; border-radius: 6px !important; height: 3.2em; font-weight: bold !important; border: none !important; }
 div.stButton > button[key="btn_guardar_edicao"] { width: 100%; background-color: #2980b9 !important; color: white !important; border-radius: 6px !important; height: 3.2em; font-weight: bold !important; border: none !important; }
 div.stButton > button[key="btn_eliminar_direto"] { width: 100%; background-color: #c0392b !important; color: white !important; border-radius: 6px !important; height: 3.2em; font-weight: bold !important; border: none !important; }
 div.stButton > button[key="btn_login"] { background-color: #002b5b !important; color: white !important; font-weight: bold !important; width: 100%; height: 3em; border-radius: 6px !important; }
 </style>
 """, unsafe_allow_html=True)
-
-# JavaScript Inteligente que destrói o botão "Gerenciar aplicativo" e limpa o fundo
-components.html("""
-<script>
-    function limparElementos() {
-        // Remove barras superiores nativas do Streamlit Cloud
-        const headers = window.parent.document.getElementsByTagName('header');
-        for (let i = 0; i < headers.length; i++) { headers[i].style.display = 'none'; }
-        
-        const decorations = window.parent.document.querySelectorAll('[data-testid="stDecoration"]');
-        decorations.forEach(el => el.style.display = 'none');
-
-        // Localiza e remove o botão preto teimoso no canto inferior
-        const badges = window.parent.document.querySelectorAll('[data-testid="stViewerBadge"], .stViewerBadge, iframe[title="Managed Hosting Badge"]');
-        badges.forEach(el => el.remove());
-        
-        // Remove qualquer elemento com texto de gestão
-        const divs = window.parent.document.getElementsByTagName('div');
-        for (let i = 0; i < divs.length; i++) {
-            if (divs[i].textContent && divs[i].textContent.includes('Gerenciar aplicativo')) {
-                divs[i].remove();
-            }
-        }
-    }
-    // Executa continuamente para garantir que o botão não reaparece
-    setInterval(limparElementos, 100);
-</script>
-""", height=0, width=0)
 
 # --- SISTEMA DE CONTROLO DE LOGIN ---
 if "autenticado" not in st.session_state:
@@ -213,7 +194,7 @@ if submetido:
             st.rerun()
 
 with col2:
-    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px; margin-bottom: 15px;'>📊 Histórico de Produção</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px; margin-bottom: 15px;'>📊 Histórico de Production</h3>", unsafe_allow_html=True)
     
     dados_selecionados = None
     if conexao_ok:
