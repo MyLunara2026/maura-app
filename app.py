@@ -29,8 +29,15 @@ div[data-testid="stWidgetLabel"] p { color: #002b5b !important; font-weight: bol
 div[data-baseweb="input"], div[data-baseweb="number-input"] { border: 2px solid #cfa134 !important; border-radius: 6px !important; background-color: white !important; }
 div[data-testid="stForm"] { border: 2px solid #002b5b !important; border-radius: 12px !important; padding: 25px !important; background-color: #fdfbf7 !important; box-shadow: 0 6px 15px rgba(0,0,0,0.05) !important; }
 
-/* Centralização Absoluta do Logo no Login */
-.logo-center { display: block; margin-left: auto; margin-right: auto; text-align: center; margin-bottom: 20px; }
+/* Contentor de Centralização Absoluta do Logo */
+.logo-login-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    margin-bottom: 25px;
+}
 
 /* Botão ADICIONAR (Verde) */
 div.stButton > button[key="btn_adicionar"] { width: 100%; background-color: #27ae60 !important; color: white !important; border-radius: 6px !important; height: 3.2em; font-weight: bold !important; border: none !important; }
@@ -56,11 +63,18 @@ if not st.session_state["autenticado"]:
     col_l1, col_l2, col_l3 = st.columns([1, 1.2, 1])
     
     with col_l2:
-        # Apresentação do Logo Centralizado
+        # Injeção Direta em HTML para garantir a centralização total na página
         if os.path.exists("logo.png"):
-            st.markdown("<div class='logo-center'>", unsafe_allow_html=True)
-            st.image("logo.png", width=160)
-            st.markdown("</div>", unsafe_allow_html=True)
+            import base64
+            with open("logo.png", "rb") as f:
+                data = f.read()
+                encoded = base64.b64encode(data).decode()
+            
+            st.markdown(f"""
+            <div class='logo-login-box'>
+                <img src='data:image/png;base64,{encoded}' style='width: 150px; height: auto;'>
+            </div>
+            """, unsafe_allow_html=True)
         
         st.markdown("""
         <div style='background-color: #002b5b; padding: 18px; border-radius: 12px; border-bottom: 4px solid #cfa134; text-align: center; margin-bottom: 20px;'>
@@ -196,7 +210,7 @@ with col2:
             linhas_clicadas = selecao.get("selection", {}).get("rows", [])
             if linhas_clicadas:
                 index_clicado = linhas_clicadas[0]
-                dados_selecionados = linhas[index_clicado]
+                dados_selecionados = lines[index_clicado]
             
             st.write("")
             
