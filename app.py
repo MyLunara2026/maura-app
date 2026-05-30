@@ -23,6 +23,14 @@ HEADERS = {
 # --- CONFIGURAÇÃO DA PÁGINA ---
 st.set_page_config(page_title="Maura | Produção Pro", layout="wide", page_icon="🕯️")
 
+# --- INICIALIZAÇÃO DE ESTADOS SEGUROS ---
+if "autenticado" not in st.session_state:
+    st.session_state["autenticado"] = False
+
+# Garante que a variável do recipiente existe sempre desde o primeiro segundo na app
+if "tipo_recipiente_selecionado" not in st.session_state:
+    st.session_state["tipo_recipiente_selecionado"] = "Não se aplica"
+
 # --- DESIGN PERSONALIZADO (CABEÇALHO NO TOPO E CORES) ---
 st.markdown("""
 <style>
@@ -85,9 +93,6 @@ div.stButton > button[key="btn_login"] { background-color: #002b5b !important; c
 """, unsafe_allow_html=True)
 
 # --- SISTEMA DE CONTROLO DE LOGIN ---
-if "autenticado" not in st.session_state:
-    st.session_state["autenticado"] = False
-
 if not st.session_state["autenticado"]:
     st.write("")
     st.write("")
@@ -177,9 +182,11 @@ with col1:
         tipo_producao = st.radio("Selecione o Material:", ["Gesso", "Cera", "Gesso + Cera"], horizontal=True)
         v_total = st.number_input("Volume Total (ml)", min_value=0.0, step=10.0, value=None, placeholder="Introduza o volume total...")
         
-        recipiente = "Não se aplica"
+        # Correção Texto: "Tipo de Recipiente:" estável e limpo
         if tipo_producao in ["Cera", "Gesso + Cera"]:
-            recipiente = st.radio("Tipo de Recipiente para a Cera:", ["Molde", "Sem Tampa"], horizontal=True)
+            st.session_state["tipo_recipiente_selecionado"] = st.radio("Tipo de Recipiente:", ["Molde", "Sem Tampa"], horizontal=True)
+        else:
+            st.session_state["tipo_recipiente_selecionado"] = "Não se aplica"
             
         st.write("---")
         extra = st.number_input("Material Extra (€)", min_value=0.0, value=0.50, step=0.10)
@@ -189,7 +196,8 @@ with col1:
 
 if submetido:
     if molde and v_total is not None and v_total > 0:
-        gramas_cera = v_total * 0.89 if (tipo_producao in ["Cera", "Gesso + Cera"] and recipiente == "Molde") else (v_total * 0.86 if tipo_producao in ["Cera", "Gesso + Cera"] else 0.0)
+        recipiente_atual = st.session_state["tipo_recipiente_selecionado"]
+        gramas_cera = v_total * 0.89 if (tipo_producao in ["Cera", "Gesso + Cera"] and recipiente_atual == "Molde") else (v_total * 0.86 if tipo_producao in ["Cera", "Gesso + Cera"] else 0.0)
 
         if tipo_producao == "Cera":
             agua, gesso, custo_gesso = 0.0, 0.0, 0.0
@@ -207,7 +215,7 @@ if submetido:
             
         custo_total_mat = custo_gesso + custo_cera + extra
         valor_final = custo_total_mat * mult
-        nome_final_molde = f"{molde} ({recipiente})" if recipiente != "Não se aplica" else molde
+        nome_final_molde = f"{molde} ({recipiente_atual})" if recipiente_atual != "Não se aplica" else molde
         
         dados_novos = {
             "molde": nome_final_molde, "tipo": tipo_producao, 
@@ -217,14 +225,14 @@ if submetido:
         try:
             res = requests.post(f"{SUPABASE_URL}/rest/v1/moldes", json=dados_novos, headers=HEADERS)
             if res.status_code in [200, 201, 204]:
-                st.toast("✅ Novo registo adicionado com sucesso!")
+                st.toast("✅ Novo registo adicionado!")
                 time.sleep(1)
                 st.rerun()
         except:
             st.rerun()
 
 with col2:
-    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px; margin-bottom: 15px;'>📊 Histórico de Produção</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px; margin-bottom: 15px;'>📊 Histórico de Production</h3>", unsafe_allow_html=True)
     
     dados_selecionados = None
     if conexao_ok:
@@ -245,7 +253,7 @@ with col2:
             linhas_clicadas = selecao.get("selection", {}).get("rows", [])
             if linhas_clicadas:
                 index_clicado = linhas_clicadas[0]
-                dados_selecionados = linhas[index_clicado]
+                dados_selecionados = lines = linhas[index_clicado]
             
             st.write("")
             
@@ -292,8 +300,9 @@ with col2:
                             try:
                                 res_put = requests.patch(f"{SUPABASE_URL}/rest/v1/moldes?id=eq.{dados_selecionados['id']}", json=dados_atualizados, headers=HEADERS)
                                 if res_put.status_code in [200, 204]:
-                                    st.toast("💾 Alterações guardadas com sucesso!")
-                                    time.sleep(1)
+                                    # Alinhamento Centralizado e Limpo
+                                    st.success("💾 Alterações guardadas com sucesso!")
+                                    time.sleep(1.5)
                                     st.rerun()
                             except:
                                 st.rerun()
@@ -303,8 +312,9 @@ with col2:
                             try:
                                 res_del = requests.delete(f"{SUPABASE_URL}/rest/v1/moldes?id=eq.{dados_selecionados['id']}", headers=HEADERS)
                                 if res_del.status_code in [200, 204]:
-                                    st.toast("🗑️ Registo eliminado com sucesso!")
-                                    time.sleep(1)
+                                    # Alinhamento Centralizado e com maior tempo de leitura
+                                    st.success("🗑️ Registo eliminado com sucesso!")
+                                    time.sleep(1.8)
                                     st.rerun()
                             except:
                                 st.rerun()
