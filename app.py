@@ -38,11 +38,20 @@ div[data-testid="stDecoration"] { display: none !important; }
 div[data-testid="stWidgetLabel"] p { color: #002b5b !important; font-weight: bold !important; }
 div[data-baseweb="input"], div[data-baseweb="number-input"] { border: 2px solid #cfa134 !important; border-radius: 6px !important; background-color: white !important; }
 
-/* REFORÇO MÁXIMO: Oculta as instruções mesmo quando se escreve nos campos */
-div[data-testid="stInputInstructions"] {
+/* BLOQUEIO TOTAL E ABSOLUTO: Oculta qualquer texto de instrução que apareça antes ou durante a escrita */
+[data-testid="stInputInstructions"], 
+[data-testid="stWidgetInstructions"],
+div[data-testid="stInputInstructions"] p, 
+div[data-testid="stInputInstructions"] span,
+.st-emotion-cache-1itdy7u {
     display: none !important;
     visibility: hidden !important;
+    opacity: 0 !important;
     height: 0px !important;
+    font-size: 0px !important;
+    line-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 /* Caixa visual elegante para o Login */
@@ -234,7 +243,7 @@ with col2:
             linhas_clicadas = selecao.get("selection", {}).get("rows", [])
             if linhas_clicadas:
                 index_clicado = linhas_clicadas[0]
-                dados_selecionados = lines[index_clicado]
+                dados_selecionados = linhas[index_clicado]
             
             st.write("")
             
