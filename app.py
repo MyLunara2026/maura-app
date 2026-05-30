@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import requests
 import os
+import streamlit.components.v1 as components
 
 # --- CONFIGURAÇÕES DA BASE DE DADOS (SUPABASE) ---
 try:
@@ -38,18 +39,17 @@ div[data-testid="stDecoration"] { display: none !important; }
 div[data-testid="stWidgetLabel"] p { color: #002b5b !important; font-weight: bold !important; }
 div[data-baseweb="input"], div[data-baseweb="number-input"] { border: 2px solid #cfa134 !important; border-radius: 6px !important; background-color: white !important; }
 
-/* SOLUÇÃO DEFINITIVA: Desativa e oculta completamente o texto "Press Enter to submit form" */
+/* ATAQUE CSS: Força o desaparecimento completo de qualquer instrução de widget */
+[data-testid="stWidgetInstructions"], 
 span[data-testid="stWidgetInstructions"], 
-div[data-testid="stWidgetInstructions"] span, 
 div[data-testid="stWidgetInstructions"] {
-    font-size: 0px !important;
     display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;
     height: 0px !important;
-    line-height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
+    font-size: 0px !important;
+    position: absolute !important;
+    pointer-events: none !important;
 }
 
 /* Estilização exclusiva do formulário de trabalho interno */
@@ -72,6 +72,22 @@ div.stButton > button[key="btn_eliminar_direto"] { width: 100%; background-color
 div.stButton > button[key="btn_login"] { background-color: #002b5b !important; color: white !important; font-weight: bold !important; width: 100%; height: 3em; border-radius: 6px !important; }
 </style>
 """, unsafe_allow_html=True)
+
+# ARMA SECRETA: JavaScript que roda em loop limpando o texto em inglês caso ele queira aparecer
+components.html("""
+<script>
+    const ocultarTextoIngles = () => {
+        const elementos = window.parent.document.querySelectorAll('[data-testid="stWidgetInstructions"]');
+        elementos.forEach(el => {
+            el.style.display = 'none';
+            el.innerHTML = '';
+        });
+    };
+    // Executa imediatamente e continua a verificar a cada 100 milissegundos
+    ocultarTextoIngles();
+    setInterval(ocultarTextoIngles, 100);
+</script>
+""", height=0, width=0)
 
 # --- SISTEMA DE CONTROLO DE LOGIN ---
 if "autenticado" not in st.session_state:
@@ -231,7 +247,7 @@ with col2:
             linhas_clicadas = selecao.get("selection", {}).get("rows", [])
             if linhas_clicadas:
                 index_clicado = linhas_clicadas[0]
-                dados_selecionados = linhas[index_clicado]
+                dados_selecionados = lines[index_clicado]
             
             st.write("")
             
