@@ -21,9 +21,16 @@ HEADERS = {
 # --- CONFIGURAÇÃO DA PÁGINA ---
 st.set_page_config(page_title="Maura | Produção Pro", layout="wide", page_icon="🕯️")
 
-# --- DESIGN PERSONALIZADO EM BEGE, AZUL E OURO ---
+# --- DESIGN PERSONALIZADO (OCULTA BARRA DO TOPO E ESTILIZA O PAINEL) ---
 st.markdown("""
 <style>
+/* Remove a barra superior do Streamlit e o menu padrão */
+header { visibility: hidden !important; height: 0px !important; }
+#MainMenu { visibility: hidden !important; }
+footer { visibility: hidden !important; }
+div[data-testid="stDecoration"] { display: none !important; }
+
+/* Configuração de Cores da Aplicação */
 .stApp { background-color: #f4ecd8 !important; }
 div[data-testid="stWidgetLabel"] p { color: #002b5b !important; font-weight: bold !important; }
 div[data-baseweb="input"], div[data-baseweb="number-input"] { border: 2px solid #cfa134 !important; border-radius: 6px !important; background-color: white !important; }
@@ -39,16 +46,10 @@ div[data-testid="stForm"] { border: 2px solid #002b5b !important; border-radius:
     margin-bottom: 25px;
 }
 
-/* Botão ADICIONAR (Verde) */
+/* Botões Customizados */
 div.stButton > button[key="btn_adicionar"] { width: 100%; background-color: #27ae60 !important; color: white !important; border-radius: 6px !important; height: 3.2em; font-weight: bold !important; border: none !important; }
-
-/* Botão GUARDAR EDIÇÃO (Azul) */
 div.stButton > button[key="btn_guardar_edicao"] { width: 100%; background-color: #2980b9 !important; color: white !important; border-radius: 6px !important; height: 3.2em; font-weight: bold !important; border: none !important; }
-
-/* Botão ELIMINAR (Vermelho) */
 div.stButton > button[key="btn_eliminar_direto"] { width: 100%; background-color: #c0392b !important; color: white !important; border-radius: 6px !important; height: 3.2em; font-weight: bold !important; border: none !important; }
-
-/* Botão LOGIN */
 div.stButton > button[key="btn_login"] { background-color: #002b5b !important; color: white !important; font-weight: bold !important; width: 100%; height: 3em; border-radius: 6px !important; }
 </style>
 """, unsafe_allow_html=True)
@@ -63,7 +64,7 @@ if not st.session_state["autenticado"]:
     col_l1, col_l2, col_l3 = st.columns([1, 1.2, 1])
     
     with col_l2:
-        # Injeção Direta em HTML para garantir a centralização total na página
+        # Apresentação do Logo Centralizado se o ficheiro existir
         if os.path.exists("logo.png"):
             import base64
             with open("logo.png", "rb") as f:
@@ -89,6 +90,7 @@ if not st.session_state["autenticado"]:
             botao_entrar = st.form_submit_button("ENTRAR NO PAINEL", key="btn_login")
             
             if botao_entrar:
+                # Validação com os novos dados de acesso solicitados
                 if usuario_input == "lunara2026" and senha_input == "220415F&M":
                     st.session_state["autenticado"] = True
                     st.rerun()
@@ -190,7 +192,7 @@ if submetido:
             st.rerun()
 
 with col2:
-    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px;'>📊 Histórico de Production</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px;'>📊 Histórico de Produção</h3>", unsafe_allow_html=True)
     
     dados_selecionados = None
     if conexao_ok:
@@ -210,7 +212,7 @@ with col2:
             linhas_clicadas = selecao.get("selection", {}).get("rows", [])
             if linhas_clicadas:
                 index_clicado = linhas_clicadas[0]
-                dados_selecionados = lines[index_clicado]
+                dados_selecionados = linhas[index_clicado]
             
             st.write("")
             
@@ -237,7 +239,7 @@ with col2:
                             c_ge_ed = (ge_ed * 7.49) / 1000
                             g_cera_ed, c_ce_ed = 0.0, 0.0
                         else:
-                            ag_ed = novo_vol / 2
+                            ag_ed = Float(novo_vol / 2)
                             ge_ed = ag_ed * 2.5
                             c_ge_ed = (ge_ed * 7.49) / 1000
                             c_ce_ed = (g_cera_ed * 17.50) / 2000
