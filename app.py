@@ -37,23 +37,11 @@ div[data-testid="stDecoration"] { display: none !important; }
 /* Configuração de Cores Gerais do Painel Lunara */
 .stApp { background-color: #f4ecd8 !important; }
 
-/* SOLUÇÃO DEFINITIVA PARA O TEXTO ESCURO:
-   Alvo em absolutamente todas as camadas de texto que o Streamlit gera para os Labels.
-   O truque do 'text-shadow' garante que a letra ganha uma definição preta pura na diagonal.
-*/
-div[data-testid="stWidgetLabel"] label,
-div[data-testid="stWidgetLabel"] p,
-div[data-testid="stWidgetLabel"] span,
-label p,
-label span,
-.st-emotion-cache-ue68e5 p,
-.st-emotion-cache-1p27gi6 p { 
+/* CORREÇÃO CORRETA E LIMPA: Aplica o preto nítido e elegante diretamente na div do label */
+div[data-testid="stWidgetLabel"] label { 
     color: #000000 !important; 
-    font-weight: 800 !important; 
-    font-size: 1.2rem !important; 
-    font-family: sans-serif !important;
-    -webkit-text-fill-color: #000000 !important;
-    text-shadow: 0.5px 0.5px 0px #000000 !important;
+    font-weight: 600 !important; 
+    font-size: 1.1rem !important;
 }
 
 div[data-baseweb="input"], div[data-baseweb="number-input"] { border: 2px solid #cfa134 !important; border-radius: 6px !important; background-color: white !important; }
@@ -103,7 +91,7 @@ if not st.session_state["autenticado"]:
                 data = f.read()
                 encoded = base64.b64encode(data).decode()
             
-            # Logótipo com 220px fixos para destaque ideal na tela de login
+            # Logótipo com os 220px bem definidos para preencher o espaço corretamente
             st.markdown(f"""
             <div class='logo-login-box'>
                 <img src='data:image/png;base64,{encoded}' style='width: 220px; height: auto;'>
@@ -121,7 +109,6 @@ if not st.session_state["autenticado"]:
             usuario_input = st.text_input("Utilizador")
             senha_input = st.text_input("Palavra-passe", type="password")
             
-            # Força o alinhamento centralizado do botão de login
             st.markdown('<div class="div-botao-central">', unsafe_allow_html=True)
             botao_entrar = st.form_submit_button("ENTRAR NO PAINEL", key="btn_login")
             st.markdown('</div>', unsafe_allow_html=True)
