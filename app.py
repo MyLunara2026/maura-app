@@ -194,7 +194,7 @@ if submetido:
             st.rerun()
 
 with col2:
-    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px; margin-bottom: 15px;'>📊 Histórico de Production</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px; margin-bottom: 15px;'>📊 Histórico de Produção</h3>", unsafe_allow_html=True)
     
     dados_selecionados = None
     if conexao_ok:
