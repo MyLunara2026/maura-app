@@ -20,7 +20,7 @@ HEADERS = {
 }
 
 # --- CONFIGURAÇÃO DA PÁGINA ---
-st.set_page_config(page_title="Maura | Produção Pro", layout="wide", page_icon="🕯️")
+st.set_page_config(page_title="Maura | Production Pro", layout="wide", page_icon="🕯️")
 
 # --- DESIGN PERSONALIZADO (CABEÇALHO NO TOPO E CORES) ---
 st.markdown("""
@@ -37,7 +37,10 @@ div[data-testid="stDecoration"] { display: none !important; }
 /* Configuração de Cores Gerais do Painel Lunara */
 .stApp { background-color: #f4ecd8 !important; }
 
-/* Estilização dos nossos títulos manuais para ficarem perfeitos, pretos e finos */
+/* DESIGN DA FONTE FINAL: 
+   Estilo aplicado através do nosso rótulo manual em HTML.
+   Garante fonte nativa, tamanho perfeito (0.95rem) e cor preta estável.
+*/
 .label-custom-login {
     color: #000000 !important;
     font-weight: 500 !important;
@@ -109,7 +112,7 @@ if not st.session_state["autenticado"]:
         """, unsafe_allow_html=True)
         
         with st.form("form_login"):
-            # SOLUÇÃO REAL: Criamos o título em HTML limpo e ocultamos o do Streamlit para evitar bugs
+            # Rótulos manuais HTML estáveis com visibilidade oculta no componente nativo
             st.markdown('<div class="label-custom-login">Utilizador</div>', unsafe_allow_html=True)
             usuario_input = st.text_input("Utilizador", label_visibility="collapsed")
             
@@ -241,7 +244,7 @@ with col2:
             linhas_clicadas = selecao.get("selection", {}).get("rows", [])
             if linhas_clicadas:
                 index_clicado = linhas_clicadas[0]
-                dados_selecionados = lines[index_clicado]
+                dados_selecionados = linhas[index_clicado]
             
             st.write("")
             
