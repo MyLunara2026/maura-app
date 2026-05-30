@@ -21,15 +21,11 @@ HEADERS = {
 }
 
 # --- CONFIGURAÇÃO DA PÁGINA ---
-st.set_page_config(page_title="Maura | Produção Pro", layout="wide", page_icon="🕯️")
+st.set_page_config(page_title="Maura | Production Pro", layout="wide", page_icon="🕯️")
 
 # --- INICIALIZAÇÃO DE ESTADOS SEGUROS ---
 if "autenticado" not in st.session_state:
     st.session_state["autenticado"] = False
-
-# Garante que a variável do recipiente existe sempre desde o primeiro segundo na app
-if "tipo_recipiente_selecionado" not in st.session_state:
-    st.session_state["tipo_recipiente_selecionado"] = "Não se aplica"
 
 # --- DESIGN PERSONALIZADO (CABEÇALHO NO TOPO E CORES) ---
 st.markdown("""
@@ -46,10 +42,7 @@ div[data-testid="stDecoration"] { display: none !important; }
 /* Configuração de Cores Gerais do Painel Lunara */
 .stApp { background-color: #f4ecd8 !important; }
 
-/* DESIGN DA FONTE FINAL: 
-   Estilo aplicado através do nosso rótulo manual em HTML.
-   Garante fonte nativa, tamanho perfeito (0.95rem) e cor preta estável.
-*/
+/* DESIGN DA FONTE FINAL */
 .label-custom-login {
     color: #000000 !important;
     font-weight: 500 !important;
@@ -62,8 +55,14 @@ div[data-testid="stDecoration"] { display: none !important; }
 /* Bordas dos inputs */
 div[data-baseweb="input"], div[data-baseweb="number-input"] { border: 2px solid #cfa134 !important; border-radius: 6px !important; background-color: white !important; }
 
-/* Estilização exclusiva do formulário de trabalho interno */
-div[data-testid="stColumn"] div[data-testid="stForm"] { border: 2px solid #002b5b !important; border-radius: 12px !important; padding: 25px !important; background-color: #fdfbf7 !important; box-shadow: 0 6px 15px rgba(0,0,0,0.05) !important; }
+/* Estilização exclusiva do contentor do formulário de trabalho */
+.box-formulario {
+    border: 2px solid #002b5b !important;
+    border-radius: 12px !important;
+    padding: 25px !important;
+    background-color: #fdfbf7 !important;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.05) !important;
+}
 
 /* Contentor para Centralizar o Logo no Login */
 .logo-login-box {
@@ -75,7 +74,6 @@ div[data-testid="stColumn"] div[data-testid="stForm"] { border: 2px solid #002b5
     margin-bottom: 25px;
 }
 
-/* Regra para centrar o botão teimoso */
 .div-botao-central {
     display: flex !important;
     justify-content: center !important;
@@ -177,26 +175,29 @@ col1, col2 = st.columns([1, 1.4], gap="large")
 with col1:
     st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #cfa134; padding-left: 10px; margin-bottom: 15px;'>📋 Formulário de Trabalho</h3>", unsafe_allow_html=True)
     
-    with st.form("formulario_molde", clear_on_submit=True):
-        molde = st.text_input("Nome do Molde", placeholder="Ex: Jarra Tulipa")
-        tipo_producao = st.radio("Selecione o Material:", ["Gesso", "Cera", "Gesso + Cera"], horizontal=True)
-        v_total = st.number_input("Volume Total (ml)", min_value=0.0, step=10.0, value=None, placeholder="Introduza o volume total...")
+    # Criamos a nossa própria caixa visual simulando o formulário para ter atualização reativa instantânea
+    st.markdown('<div class="box-formulario">', unsafe_allow_html=True)
+    
+    molde = st.text_input("Nome do Molde", placeholder="Ex: Jarra Tulipa", key="input_nome_molde")
+    tipo_producao = st.radio("Selecione o Material:", ["Gesso", "Cera", "Gesso + Cera"], horizontal=True, key="input_tipo_material")
+    v_total = st.number_input("Volume Total (ml)", min_value=0.0, step=10.0, value=None, placeholder="Introduza o volume total...", key="input_vol_total")
+    
+    # REATIVIDADE EM TEMPO REAL: Aparece imediatamente sem precisar de cliques extra
+    recipiente_atual = "Não se aplica"
+    if tipo_producao in ["Cera", "Gesso + Cera"]:
+        recipiente_atual = st.radio("Tipo de Recipiente:", ["Molde", "Sem Tampa"], horizontal=True, key="input_tipo_recipiente")
         
-        # Correção Texto: "Tipo de Recipiente:" estável e limpo
-        if tipo_producao in ["Cera", "Gesso + Cera"]:
-            st.session_state["tipo_recipiente_selecionado"] = st.radio("Tipo de Recipiente:", ["Molde", "Sem Tampa"], horizontal=True)
-        else:
-            st.session_state["tipo_recipiente_selecionado"] = "Não se aplica"
-            
-        st.write("---")
-        extra = st.number_input("Material Extra (€)", min_value=0.0, value=0.50, step=0.10)
-        mult = st.number_input("Multiplicador Mão de Obra (x)", min_value=1.0, value=3.0, step=0.5)
-        
-        submetido = st.form_submit_button("ADICIONAR NOVO REGISTO", key="btn_adicionar")
+    st.write("---")
+    extra = st.number_input("Material Extra (€)", min_value=0.0, value=0.50, step=0.10, key="input_material_extra")
+    mult = st.number_input("Multiplicador Mão de Obra (x)", min_value=1.0, value=3.0, step=0.5, key="input_multiplicador")
+    
+    st.write("")
+    submetido = st.button("ADICIONAR NOVO REGISTO", key="btn_adicionar")
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 
 if submetido:
     if molde and v_total is not None and v_total > 0:
-        recipiente_atual = st.session_state["tipo_recipiente_selecionado"]
         gramas_cera = v_total * 0.89 if (tipo_producao in ["Cera", "Gesso + Cera"] and recipiente_atual == "Molde") else (v_total * 0.86 if tipo_producao in ["Cera", "Gesso + Cera"] else 0.0)
 
         if tipo_producao == "Cera":
@@ -230,9 +231,11 @@ if submetido:
                 st.rerun()
         except:
             st.rerun()
+    else:
+        st.warning("⚠️ Certifique-se de que preencheu o Nome do Molde e o Volume Total antes de submeter.")
 
 with col2:
-    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px; margin-bottom: 15px;'>📊 Histórico de Production</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px; margin-bottom: 15px;'>📊 Histórico de Produção</h3>", unsafe_allow_html=True)
     
     dados_selecionados = None
     if conexao_ok:
@@ -252,8 +255,8 @@ with col2:
             
             linhas_clicadas = selecao.get("selection", {}).get("rows", [])
             if linhas_clicadas:
-                index_clicado = linhas_clicadas[0]
-                dados_selecionados = lines = linhas[index_clicado]
+                index_clicado = líneas_clicadas[0] if 'líneas_clicadas' in locals() else linhas_clicadas[0]
+                dados_selecionados = linhas[index_clicado]
             
             st.write("")
             
@@ -300,7 +303,6 @@ with col2:
                             try:
                                 res_put = requests.patch(f"{SUPABASE_URL}/rest/v1/moldes?id=eq.{dados_selecionados['id']}", json=dados_atualizados, headers=HEADERS)
                                 if res_put.status_code in [200, 204]:
-                                    # Alinhamento Centralizado e Limpo
                                     st.success("💾 Alterações guardadas com sucesso!")
                                     time.sleep(1.5)
                                     st.rerun()
@@ -312,14 +314,13 @@ with col2:
                             try:
                                 res_del = requests.delete(f"{SUPABASE_URL}/rest/v1/moldes?id=eq.{dados_selecionados['id']}", headers=HEADERS)
                                 if res_del.status_code in [200, 204]:
-                                    # Alinhamento Centralizado e com maior tempo de leitura
                                     st.success("🗑️ Registo eliminado com sucesso!")
                                     time.sleep(1.8)
                                     st.rerun()
                             except:
                                 st.rerun()
             else:
-                st.info("💡 Clique numa linha da tabela para gerir os dados.")
+                st.markdown("<div style='background-color: #fdfbf7; padding: 15px; border-radius: 6px; border-left: 4px solid #002b5b; color: #002b5b;'>💡 Clique numa linha da tabela para gerir ou eliminar os dados.</div>", unsafe_allow_html=True)
         else:
             st.info("A base de dados está vazia.")
     else:
