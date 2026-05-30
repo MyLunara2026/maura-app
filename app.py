@@ -103,23 +103,21 @@ if not st.session_state["autenticado"]:
 # --- ÁREA PRIVADA (APÓS LOGIN) ---
 # =====================================================================
 
-# Cabeçalho perfeitamente alinhado no topo e com texto centralizado
+# Cabeçalho limpo, focado e perfeitamente centralizado
 if os.path.exists("logo.png"):
     col_h1, col_h2 = st.columns([1, 6.5])
     with col_h1:
-        st.image("logo.png", width=95)
+        st.image("logo.png", width=85)
     with col_h2:
         st.markdown("""
-        <div style='background-color: #002b5b; padding: 18px; border-radius: 12px; margin-bottom: 20px; border-bottom: 6px solid #cfa134; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center;'>
-            <h1 style='color: #f4ecd8; margin: 0; font-family: "Helvetica Neue", sans-serif; font-weight: 700; font-size: 1.9rem; letter-spacing: 1px;'>LUNARA | GESTÃO DE MOLDES</h1>
-            <p style='color: #cfa134; margin: 5px 0 0 0; font-size: 0.95rem; font-weight: 500;'>Área Protegida • Clique diretamente numa linha para Editar ou Apagar</p>
+        <div style='background-color: #002b5b; padding: 14px; border-radius: 12px; margin-bottom: 25px; border-bottom: 6px solid #cfa134; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; display: flex; align-items: center; justify-content: center; height: 85px;'>
+            <h1 style='color: #f4ecd8; margin: 0; font-family: "Helvetica Neue", sans-serif; font-weight: 700; font-size: 1.9rem; letter-spacing: 1px; line-height: 85px;'>LUNARA | GESTÃO DE MOLDES</h1>
         </div>
         """, unsafe_allow_html=True)
 else:
     st.markdown("""
-    <div style='background-color: #002b5b; padding: 22px; border-radius: 12px; margin-bottom: 20px; border-bottom: 6px solid #cfa134; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center;'>
-        <h1 style='color: #f4ecd8; margin: 0; font-family: "Helvetica Neue", sans-serif; font-weight: 700; font-size: 1.9rem;'>LUNARA | GESTÃO DE MOLDES</h1>
-        <p style='color: #cfa134; margin: 5px 0 0 0; font-size: 0.95rem; font-weight: 500;'>Área Protegida • Clique diretamente numa linha da tabela para Editar ou Apagar</p>
+    <div style='background-color: #002b5b; padding: 18px; border-radius: 12px; margin-bottom: 25px; border-bottom: 6px solid #cfa134; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center;'>
+        <h1 style='color: #f4ecd8; margin: 0; font-family: "Helvetica Neue", sans-serif; font-weight: 700; font-size: 1.9rem; letter-spacing: 1px;'>LUNARA | GESTÃO DE MOLDES</h1>
     </div>
     """, unsafe_allow_html=True)
 
@@ -214,7 +212,7 @@ with col2:
             linhas_clicadas = selecao.get("selection", {}).get("rows", [])
             if linhas_clicadas:
                 index_clicado = linhas_clicadas[0]
-                dados_selecionados = linhas[index_clicado]
+                dados_selecionados = lines[index_clicado]
             
             st.write("")
             
@@ -236,13 +234,13 @@ with col2:
                             ag_ed, ge_ed, c_ge_ed = 0.0, 0.0, 0.0
                             c_ce_ed = (g_cera_ed * 17.50) / 2000
                         elif novo_tipo == "Gesso":
-                            ag_ed = novo_vol / 2
-                            ge_ed = ag_ed * 2.5
+                            ag_ed = float(novo_vol / 2)
+                            ge_ed = float(ag_ed * 2.5)
                             c_ge_ed = (ge_ed * 7.49) / 1000
                             g_cera_ed, c_ce_ed = 0.0, 0.0
                         else:
-                            ag_ed = novo_vol / 2
-                            ge_ed = ag_ed * 2.5
+                            ag_ed = float(novo_vol / 2)
+                            ge_ed = float(ag_ed * 2.5)
                             c_ge_ed = (ge_ed * 7.49) / 1000
                             c_ce_ed = (g_cera_ed * 17.50) / 2000
                         
