@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import requests
 import os
+import streamlit.components.v1 as components
 
 # --- CONFIGURAÇÕES DA BASE DE DADOS (SUPABASE) ---
 try:
@@ -21,51 +22,59 @@ HEADERS = {
 # --- CONFIGURAÇÃO DA PÁGINA ---
 st.set_page_config(page_title="Maura | Produção Pro", layout="wide", page_icon="🕯️")
 
-# --- REMOÇÃO FORÇADA DA BARRA PRETA INFERIOR E TIMING DO TOPO ---
-st.html("""
+# --- DESATIVAR COMPLETAMENTE AS BARRAS E O BOTÃO PRETO ---
+# CSS para ocultar elementos visíveis normais e puxar o cabeçalho para o topo
+st.markdown("""
 <style>
-/* Remove a barra superior do Streamlit e o menu padrão */
 header, footer { visibility: hidden !important; height: 0px !important; }
 #MainMenu { visibility: hidden !important; }
 div[data-testid="stDecoration"] { display: none !important; }
-
-/* Esconde o botão preto 'Gerenciar aplicativo' de forma absoluta */
-[data-testid="stViewerBadge"], 
-.stViewerBadge, 
-iframe[title="Managed Hosting Badge"],
-div[class*="stViewerBadge"] { 
-    display: none !important; 
-    visibility: hidden !important; 
-    height: 0px !important; 
-    width: 0px !important;
-}
-
-/* Puxa o conteúdo todo para o topo da página */
 .block-container { padding-top: 1.5rem !important; padding-bottom: 1rem !important; }
 
-/* Configuração de Cores Gerais */
+/* Cores e Estilos Gerais */
 .stApp { background-color: #f4ecd8 !important; }
 div[data-testid="stWidgetLabel"] p { color: #002b5b !important; font-weight: bold !important; }
 div[data-baseweb="input"], div[data-baseweb="number-input"] { border: 2px solid #cfa134 !important; border-radius: 6px !important; background-color: white !important; }
 div[data-testid="stForm"] { border: 2px solid #002b5b !important; border-radius: 12px !important; padding: 25px !important; background-color: #fdfbf7 !important; box-shadow: 0 6px 15px rgba(0,0,0,0.05) !important; }
 
-/* Contentor de Centralização Absoluta do Logo no Login */
-.logo-login-box {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    width: 100%;
-    margin-bottom: 25px;
-}
+/* Centralização do Logo no Login */
+.logo-login-box { display: flex; justify-content: center; align-items: center; text-align: center; width: 100%; margin-bottom: 25px; }
 
-/* Botões Customizados */
+/* Estilização dos Botões */
 div.stButton > button[key="btn_adicionar"] { width: 100%; background-color: #27ae60 !important; color: white !important; border-radius: 6px !important; height: 3.2em; font-weight: bold !important; border: none !important; }
 div.stButton > button[key="btn_guardar_edicao"] { width: 100%; background-color: #2980b9 !important; color: white !important; border-radius: 6px !important; height: 3.2em; font-weight: bold !important; border: none !important; }
 div.stButton > button[key="btn_eliminar_direto"] { width: 100%; background-color: #c0392b !important; color: white !important; border-radius: 6px !important; height: 3.2em; font-weight: bold !important; border: none !important; }
 div.stButton > button[key="btn_login"] { background-color: #002b5b !important; color: white !important; font-weight: bold !important; width: 100%; height: 3em; border-radius: 6px !important; }
 </style>
-""")
+""", unsafe_allow_html=True)
+
+# JavaScript Inteligente que destrói o botão "Gerenciar aplicativo" e limpa o fundo
+components.html("""
+<script>
+    function limparElementos() {
+        // Remove barras superiores nativas do Streamlit Cloud
+        const headers = window.parent.document.getElementsByTagName('header');
+        for (let i = 0; i < headers.length; i++) { headers[i].style.display = 'none'; }
+        
+        const decorations = window.parent.document.querySelectorAll('[data-testid="stDecoration"]');
+        decorations.forEach(el => el.style.display = 'none');
+
+        // Localiza e remove o botão preto teimoso no canto inferior
+        const badges = window.parent.document.querySelectorAll('[data-testid="stViewerBadge"], .stViewerBadge, iframe[title="Managed Hosting Badge"]');
+        badges.forEach(el => el.remove());
+        
+        // Remove qualquer elemento com texto de gestão
+        const divs = window.parent.document.getElementsByTagName('div');
+        for (let i = 0; i < divs.length; i++) {
+            if (divs[i].textContent && divs[i].textContent.includes('Gerenciar aplicativo')) {
+                divs[i].remove();
+            }
+        }
+    }
+    // Executa continuamente para garantir que o botão não reaparece
+    setInterval(limparElementos, 100);
+</script>
+""", height=0, width=0)
 
 # --- SISTEMA DE CONTROLO DE LOGIN ---
 if "autenticado" not in st.session_state:
@@ -166,7 +175,7 @@ with col1:
         extra = st.number_input("Material Extra (€)", min_value=0.0, value=0.50, step=0.10)
         mult = st.number_input("Multiplicador Mão de Obra (x)", min_value=1.0, value=3.0, step=0.5)
         
-        submetido = st.form_submit_button("ADICIONAR NEW REGISTO", key="btn_adicionar")
+        submetido = st.form_submit_button("ADICIONAR NOVO REGISTO", key="btn_adicionar")
 
 if submetido:
     if molde and v_total is not None and v_total > 0:
