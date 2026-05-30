@@ -21,7 +21,7 @@ HEADERS = {
 }
 
 # --- CONFIGURAÇÃO DA PÁGINA ---
-st.set_page_config(page_title="Maura | Production Pro", layout="wide", page_icon="🕯️")
+st.set_page_config(page_title="Maura | Produção Pro", layout="wide", page_icon="🕯️")
 
 # --- INICIALIZAÇÃO DE ESTADOS SEGUROS ---
 if "autenticado" not in st.session_state:
@@ -42,7 +42,7 @@ div[data-testid="stDecoration"] { display: none !important; }
 /* Configuração de Cores Gerais do Painel Lunara */
 .stApp { background-color: #f4ecd8 !important; }
 
-/* DESIGN DA FONTE FINAL */
+/* DESIGN DA FONTE FINAL DO LOGIN */
 .label-custom-login {
     color: #000000 !important;
     font-weight: 500 !important;
@@ -54,15 +54,6 @@ div[data-testid="stDecoration"] { display: none !important; }
 
 /* Bordas dos inputs */
 div[data-baseweb="input"], div[data-baseweb="number-input"] { border: 2px solid #cfa134 !important; border-radius: 6px !important; background-color: white !important; }
-
-/* Estilização exclusiva do contentor do formulário de trabalho */
-.box-formulario {
-    border: 2px solid #002b5b !important;
-    border-radius: 12px !important;
-    padding: 25px !important;
-    background-color: #fdfbf7 !important;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.05) !important;
-}
 
 /* Contentor para Centralizar o Logo no Login */
 .logo-login-box {
@@ -175,26 +166,22 @@ col1, col2 = st.columns([1, 1.4], gap="large")
 with col1:
     st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #cfa134; padding-left: 10px; margin-bottom: 15px;'>📋 Formulário de Trabalho</h3>", unsafe_allow_html=True)
     
-    # Criamos a nossa própria caixa visual simulando o formulário para ter atualização reativa instantânea
-    st.markdown('<div class="box-formulario">', unsafe_allow_html=True)
+    # Voltamos ao fluxo normal e nativo do Streamlit para evitar caixas feias e espaços vazios
+    molde = st.text_input("Nome do Molde", placeholder="Ex: Jarra Tulipa", key="molde_nome_real")
+    tipo_producao = st.radio("Selecione o Material:", ["Gesso", "Cera", "Gesso + Cera"], horizontal=True, key="material_real")
+    v_total = st.number_input("Volume Total (ml)", min_value=0.0, step=10.0, value=None, placeholder="Introduza o volume total...", key="vol_real")
     
-    molde = st.text_input("Nome do Molde", placeholder="Ex: Jarra Tulipa", key="input_nome_molde")
-    tipo_producao = st.radio("Selecione o Material:", ["Gesso", "Cera", "Gesso + Cera"], horizontal=True, key="input_tipo_material")
-    v_total = st.number_input("Volume Total (ml)", min_value=0.0, step=10.0, value=None, placeholder="Introduza o volume total...", key="input_vol_total")
-    
-    # REATIVIDADE EM TEMPO REAL: Aparece imediatamente sem precisar de cliques extra
+    # REATIVIDADE PERFEITA EM TEMPO REAL: surge no milissegundo em que escolhes Cera ou Gesso + Cera
     recipiente_atual = "Não se aplica"
     if tipo_producao in ["Cera", "Gesso + Cera"]:
-        recipiente_atual = st.radio("Tipo de Recipiente:", ["Molde", "Sem Tampa"], horizontal=True, key="input_tipo_recipiente")
+        recipiente_atual = st.radio("Tipo de Recipiente:", ["Molde", "Sem Tampa"], horizontal=True, key="recipiente_real")
         
     st.write("---")
-    extra = st.number_input("Material Extra (€)", min_value=0.0, value=0.50, step=0.10, key="input_material_extra")
-    mult = st.number_input("Multiplicador Mão de Obra (x)", min_value=1.0, value=3.0, step=0.5, key="input_multiplicador")
+    extra = st.number_input("Material Extra (€)", min_value=0.0, value=0.50, step=0.10, key="extra_real")
+    mult = st.number_input("Multiplicador Mão de Obra (x)", min_value=1.0, value=3.0, step=0.5, key="mult_real")
     
     st.write("")
     submetido = st.button("ADICIONAR NOVO REGISTO", key="btn_adicionar")
-    
-    st.markdown('</div>', unsafe_allow_html=True)
 
 if submetido:
     if molde and v_total is not None and v_total > 0:
@@ -255,7 +242,7 @@ with col2:
             
             linhas_clicadas = selecao.get("selection", {}).get("rows", [])
             if linhas_clicadas:
-                index_clicado = líneas_clicadas[0] if 'líneas_clicadas' in locals() else linhas_clicadas[0]
+                index_clicado = linhas_clicadas[0]
                 dados_selecionados = linhas[index_clicado]
             
             st.write("")
@@ -292,6 +279,9 @@ with col2:
                         v_final_ed = c_total_ed * 3.0
                         st.info(f"Novos Valores Calculados:\n- Custo: {c_total_ed:.2f}€\n- Preço Final: {v_final_ed:.2f}€")
                     
+                    # Espaço reservado para os alertas estarem bem no meio da zona de ação
+                    espaco_alerta = st.empty()
+                    
                     b_col1, b_col2 = st.columns(2)
                     with b_col1:
                         if st.button("GUARDAR ALTERAÇÕES", key="btn_guardar_edicao"):
@@ -303,7 +293,7 @@ with col2:
                             try:
                                 res_put = requests.patch(f"{SUPABASE_URL}/rest/v1/moldes?id=eq.{dados_selecionados['id']}", json=dados_atualizados, headers=HEADERS)
                                 if res_put.status_code in [200, 204]:
-                                    st.success("💾 Alterações guardadas com sucesso!")
+                                    espaco_alerta.success("💾 Alterações guardadas com sucesso!")
                                     time.sleep(1.5)
                                     st.rerun()
                             except:
@@ -314,7 +304,7 @@ with col2:
                             try:
                                 res_del = requests.delete(f"{SUPABASE_URL}/rest/v1/moldes?id=eq.{dados_selecionados['id']}", headers=HEADERS)
                                 if res_del.status_code in [200, 204]:
-                                    st.success("🗑️ Registo eliminado com sucesso!")
+                                    espaco_alerta.success("🗑️ Registo eliminado com sucesso!")
                                     time.sleep(1.8)
                                     st.rerun()
                             except:
