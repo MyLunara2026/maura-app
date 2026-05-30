@@ -33,40 +33,20 @@ div[data-testid="stDecoration"] { display: none !important; }
 /* Configuração de Fundo do Painel Lunara */
 .stApp { background-color: #f4ecd8 !important; }
 
-/* AJUSTE FORTE: Labels ("Utilizador" e "Palavra-passe") Grandes, a Preto e Negrito */
+/* AJUSTE EQUILIBRADO: Letras a preto, tamanho médio e elegante */
 div[data-testid="stWidgetLabel"] p, 
-label[data-testid="stWidgetLabel"] p,
-div[data-testid="stWidgetLabel"] { 
+label[data-testid="stWidgetLabel"] p { 
     color: #000000 !important; 
-    font-weight: 800 !important; 
-    font-size: 1.35rem !important;
-    margin-bottom: 8px !important;
+    font-weight: 600 !important; 
+    font-size: 1.1rem !important;
+    margin-bottom: 6px !important;
 }
 
-/* Formatação das caixas de texto onde se escreve */
+/* Moldura dourada elegante nas caixas de introdução */
 div[data-baseweb="input"], div[data-baseweb="number-input"] { 
     border: 2px solid #cfa134 !important; 
     border-radius: 6px !important; 
     background-color: white !important; 
-}
-
-/* BLOQUEIO ABSOLUTO: Remove o "Press Enter to apply" ou "submit form" em qualquer estado */
-[data-testid="stInputInstructions"], 
-[data-testid="stWidgetInstructions"],
-div[data-testid="stInputInstructions"] p,
-div[data-testid="stInputInstructions"] span,
-div[class*="st-"] small,
-.st-emotion-cache-1itdy7u,
-.st-emotion-cache-q3uqae,
-.st-emotion-cache-1m69n64 {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    height: 0px !important;
-    font-size: 0px !important;
-    line-height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
 }
 
 /* Caixa visual elegante para a Área de Login */
@@ -79,36 +59,38 @@ div[class*="st-"] small,
     margin-bottom: 25px !important;
 }
 
-/* Contentor do Logo: Centralizado e afastado da caixa inferior */
+/* Contentor do Logo: Centralizado e com espaço de respiro */
 .logo-login-box {
     display: flex;
     justify-content: center;
     align-items: center;
     text-align: center;
     width: 100%;
-    margin-bottom: 35px !important; /* Espaço para não colar à caixa */
+    margin-bottom: 30px !important;
     margin-top: 10px;
 }
 
-/* Centralização Perfeita do Botão de Entrada */
-div.stButton {
-    text-align: center !important;
+/* Alinhamento Forçado e Estilização do Botão Entrar */
+.div-botao-centrado {
     display: flex !important;
     justify-content: center !important;
+    align-items: center !important;
     width: 100% !important;
+    margin-top: 20px !important;
 }
 
 div.stButton > button[key="btn_login"] { 
     background-color: #002b5b !important; 
-    color: #f4ecd8 !important; 
+    color: #ffffff !important; 
     font-weight: bold !important;
-    font-size: 1.1rem !important;
+    font-size: 1.05rem !important;
+    text-transform: uppercase !important;
     letter-spacing: 1px !important;
-    width: 50% !important; /* Largura proporcional e elegante */
-    height: 3.2em !important; 
-    border-radius: 8px !important; 
+    width: 220px !important; /* Tamanho fixo e elegante */
+    height: 45px !important; 
+    border-radius: 6px !important; 
     border: none !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1) !important;
 }
 
 /* Botões do Painel Interno */
@@ -135,14 +117,14 @@ if not st.session_state["autenticado"]:
             
             st.markdown(f"""
             <div class='logo-login-box'>
-                <img src='data:image/png;base64,{encoded}' style='width: 145px; height: auto;'>
+                <img src='data:image/png;base64,{encoded}' style='width: 135px; height: auto;'>
             </div>
             """, unsafe_allow_html=True)
         
         st.markdown("""
         <div class="caixa-login-estilizada">
             <div style='text-align: center;'>
-                <h2 style='color: #002b5b; margin: 0; font-family: sans-serif; font-size: 1.8rem; font-weight: bold;'>Área de Login</h2>
+                <h2 style='color: #002b5b; margin: 0; font-family: sans-serif; font-size: 1.7rem; font-weight: bold;'>Área de Login</h2>
                 <p style='color: #7f8c8d; margin: 6px 0 0 0; font-size: 0.95rem;'>Introduza as suas credenciais de acesso</p>
             </div>
         </div>
@@ -151,8 +133,10 @@ if not st.session_state["autenticado"]:
         usuario_input = st.text_input("Utilizador", key="input_user")
         senha_input = st.text_input("Palavra-passe", type="password", key="input_pass")
         
-        st.write("") # Pequeno espaço estético
+        # Bloco HTML com classe personalizada para garantir a centralização real do botão
+        st.markdown('<div class="div-botao-centrado">', unsafe_allow_html=True)
         botao_entrar = st.button("ENTRAR NO PAINEL", key="btn_login")
+        st.markdown('</div>', unsafe_allow_html=True)
         
         if botao_entrar:
             if usuario_input == "lunara2026" and senha_input == "220415F&M":
@@ -257,7 +241,7 @@ if submetido:
             st.rerun()
 
 with col2:
-    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px; margin-bottom: 15px;'>📊 Histórico de Production</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px; margin-bottom: 15px;'>📊 Histórico de Produção</h3>", unsafe_allow_html=True)
     
     dados_selecionados = None
     if conexao_ok:
@@ -277,8 +261,8 @@ with col2:
             
             linhas_clicadas = selecao.get("selection", {}).get("rows", [])
             if linhas_clicadas:
-                index_clicado = lines_clicadas[0]
-                dados_selecionados = linhas[index_clicado]
+                index_clicado = linhas_clicadas[0]
+                dados_selecionados = lines[index_clicado]
             
             st.write("")
             
