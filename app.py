@@ -36,16 +36,63 @@ div.stButton > button[key="btn_guardar_edicao"] { width: 100%; background-color:
 
 /* Botão ELIMINAR (Vermelho) */
 div.stButton > button[key="btn_eliminar_direto"] { width: 100%; background-color: #c0392b !important; color: white !important; border-radius: 6px !important; height: 3.2em; font-weight: bold !important; border: none !important; }
+
+/* Botão LOGIN */
+div.stButton > button[key="btn_login"] { background-color: #002b5b !important; color: white !important; font-weight: bold !important; width: 100%; height: 3em; border-radius: 6px !important; }
 </style>
 """, unsafe_allow_html=True)
+
+# --- SISTEMA DE CONTROLO DE LOGIN ---
+if "autenticado" not in st.session_state:
+    st.session_state["autenticado"] = False
+
+if not st.session_state["autenticado"]:
+    # Ecrã de Login Centralizado
+    st.write("")
+    st.write("")
+    col_l1, col_l2, col_l3 = st.columns([1, 1.2, 1])
+    
+    with col_l2:
+        st.markdown("""
+        <div style='background-color: #002b5b; padding: 20px; border-radius: 12px; border-bottom: 4px solid #cfa134; text-align: center; margin-bottom: 20px;'>
+            <h2 style='color: #f4ecd8; margin: 0; font-family: sans-serif;'>💎 Acesso Restrito</h2>
+            <p style='color: #cfa134; margin: 5px 0 0 0;'>Introduza as suas credenciais Lunara</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        with st.form("form_login"):
+            usuario_input = st.text_input("Utilizador")
+            senha_input = st.text_input("Palavra-passe", type="password")
+            botao_entrar = st.form_submit_button("ENTRAR NO PAINEL", key="btn_login")
+            
+            if botao_entrar:
+                # Altera aqui os teus dados de acesso se quiseres algo mais complexo:
+                if usuario_input == "lunara2026" and senha_input == "220415F&M":
+                    st.session_state["autenticado"] = True
+                    st.rerun()
+                else:
+                    st.error("Credenciais incorretas. Tente novamente.")
+    st.stop() # Bloqueia o resto do código se não estiver logado
+
+# =====================================================================
+# --- A PARTIR DAQUI SÓ ENTRA QUEM FIZER LOGIN COM SUCESSO ---
+# =====================================================================
 
 # Cabeçalho da Lunara
 st.markdown("""
 <div style='background-color: #002b5b; padding: 25px; border-radius: 12px; margin-bottom: 25px; border-bottom: 6px solid #cfa134; box-shadow: 0 4px 10px rgba(0,0,0,0.1);'>
+    <div style='float: right;'>
+        <form action='javascript:void(0);'></form>
+    </div>
     <h1 style='color: #f4ecd8; margin: 0; font-family: "Helvetica Neue", sans-serif; font-weight: 700; text-align: center;'>GESTÃO DE MOLDES: GESSO & CERA</h1>
-    <p style='color: #cfa134; margin: 6px 0 0 0; font-size: 1.1rem; font-weight: 500; text-align: center;'>Clique diretamente numa linha da tabela para Editar ou Apagar</p>
+    <p style='color: #cfa134; margin: 6px 0 0 0; font-size: 1.1rem; font-weight: 500; text-align: center;'>Área Protegida • Clique diretamente numa linha da tabela para Editar ou Apagar</p>
 </div>
 """, unsafe_allow_html=True)
+
+# Botão de Log Out discreto no topo lateral direito
+if st.sidebar.button("🔒 Sair do Painel (Log Out)"):
+    st.session_state["autenticado"] = False
+    st.rerun()
 
 # --- CARREGAR DADOS HISTÓRICOS ---
 linhas = []
@@ -58,7 +105,6 @@ try:
 except:
     conexao_ok = False
 
-# Layout em duas colunas para Computador
 col1, col2 = st.columns([1, 1.4], gap="large")
 
 with col1:
@@ -115,36 +161,32 @@ if submetido:
             st.rerun()
 
 with col2:
-    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px;'>📊 Histórico de Produção (Clique numa linha)</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px;'>📊 Histórico de Produção</h3>", unsafe_allow_html=True)
     
     dados_selecionados = None
-    
     if conexao_ok:
         if linhas:
             df = pd.DataFrame(linhas)
             df_visual = df[["molde", "tipo", "agua", "gesso", "cera", "custo_mat", "valor_final"]]
             df_visual.columns = ["Molde (Recipiente)", "Tipo", "Água", "Gesso", "Cera Calculada", "Custo Mat.", "PREÇO FINAL"]
             
-            # --- TABELA INTERATIVA COM SELEÇÃO DE LINHA ---
             selecao = st.dataframe(
                 df_visual, 
                 use_container_width=True, 
                 hide_index=True,
-                selection_mode="single-row",  # Ativa a seleção de uma linha individual
-                on_select="rerun"            # Recarrega o ecrã instantaneamente ao clicar
+                selection_mode="single-row",
+                on_select="rerun"
             )
             
-            # Verificar se o utilizador clicou em alguma linha
             linhas_clicadas = selecao.get("selection", {}).get("rows", [])
             if linhas_clicadas:
                 index_clicado = linhas_clicadas[0]
-                dados_selecionados = linhas[index_clicado]  # Puxa os dados reais da linha clicada
+                dados_selecionados = linhas[index_clicado]
             
             st.write("")
             
-            # --- ZONA DE GESTÃO DINÂMICA (Só aparece se clicares na tabela) ---
             if dados_selecionados:
-                st.markdown(f"<div style='background-color: #002b5b; padding: 10px; border-radius: 6px; color: white; font-weight: bold;'>⚙️ A Gestor o Molde Selecionado: {dados_selecionados['molde']}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='background-color: #002b5b; padding: 10px; border-radius: 6px; color: white; font-weight: bold;'>⚙️ A Gerir: {dados_selecionados['molde']}</div>", unsafe_allow_html=True)
                 
                 with st.expander("📝 Editar ou Apagar o Molde Selecionado", expanded=True):
                     c_ed1, c_ed2 = st.columns(2)
@@ -173,10 +215,8 @@ with col2:
                         
                         c_total_ed = c_ge_ed + c_ce_ed + 0.50
                         v_final_ed = c_total_ed * 3.0
-                        
                         st.info(f"Novos Valores Calculados:\n- Custo: {c_total_ed:.2f}€\n- Preço Final: {v_final_ed:.2f}€")
                     
-                    # Dois botões lado a lado para rapidez total
                     b_col1, b_col2 = st.columns(2)
                     with b_col1:
                         if st.button("GUARDAR ALTERAÇÕES", key="btn_guardar_edicao"):
@@ -203,7 +243,7 @@ with col2:
                             except:
                                 st.rerun()
             else:
-                st.info("💡 Dica: Clique numa linha da tabela acima para alterar ou apagar rapidamente esses dados.")
+                st.info("💡 Clique numa linha da tabela para gerir os dados.")
         else:
             st.info("A base de dados está vazia.")
     else:
