@@ -201,10 +201,12 @@ with col2:
             df_visual = df[["molde", "tipo", "agua", "gesso", "cera", "custo_mat", "valor_final"]]
             df_visual.columns = ["Molde (Recipiente)", "Tipo", "Água", "Gesso", "Cera Calculada", "Custo Mat.", "PREÇO FINAL"]
             
+            # Aumentámos a altura (height=480) para exibir muito mais linhas de uma só vez
             selecao = st.dataframe(
                 df_visual, 
                 use_container_width=True, 
                 hide_index=True,
+                height=480,
                 selection_mode="single-row",
                 on_select="rerun"
             )
@@ -212,10 +214,11 @@ with col2:
             linhas_clicadas = selecao.get("selection", {}).get("rows", [])
             if linhas_clicadas:
                 index_clicado = linhas_clicadas[0]
-                dados_selecionados = lines[index_clicado]
+                dados_selecionados = linhas[index_clicado]
             
             st.write("")
             
+            # Se uma linha for clicada, abre o menu de edição
             if dados_selecionados:
                 st.markdown(f"<div style='background-color: #002b5b; padding: 10px; border-radius: 6px; color: white; font-weight: bold;'>⚙️ A Gerir: {dados_selecionados['molde']}</div>", unsafe_allow_html=True)
                 
@@ -274,6 +277,7 @@ with col2:
                             except:
                                 st.rerun()
             else:
+                # Dica posicionada de forma limpa e fixa cá em baixo quando nada está selecionado
                 st.info("💡 Clique numa linha da tabela para gerir os dados.")
         else:
             st.info("A base de dados está vazia.")
