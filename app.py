@@ -37,16 +37,18 @@ div[data-testid="stDecoration"] { display: none !important; }
 /* Configuração de Cores Gerais do Painel Lunara */
 .stApp { background-color: #f4ecd8 !important; }
 
-/* AJUSTE DE TAMANHO E COR:
-   Definido para preto puro (#000000), mas com tamanho reduzido (0.95rem) e peso elegante (500).
-   Assim fica perfeitamente visível, mas discreto e profissional.
+/* CORREÇÃO DEFINITIVA DA FONTE:
+   Focado diretamente no elemento de texto do widget de input.
+   Removido o preenchimento webkit que quebrava a suavização e adicionada a suavização de fontes nativa.
 */
-div[data-testid="stForm"] label p {
-    color: #000000 !important;
-    -webkit-text-fill-color: #000000 !important;
-    font-weight: 500 !important;
+div[data-testid="stWidgetLabel"] label p {
+    color: #111111 !important;
+    -webkit-text-fill-color: initial !important; /* Liberta o preenchimento artificial */
+    font-weight: 600 !important;
     font-size: 0.95rem !important;
-    letter-spacing: 0.3px !important;
+    font-family: inherit !important; /* Mantém a fonte elegante original do sistema */
+    -webkit-font-smoothing: antialiased !important; /* Força nitidez limpa */
+    -moz-osx-font-smoothing: grayscale !important;
 }
 
 /* Bordas dos inputs */
@@ -218,7 +220,7 @@ if submetido:
             st.rerun()
 
 with col2:
-    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px; margin-bottom: 15px;'>📊 Histórico de Production</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #002b5b; font-family: sans-serif; border-left: 5px solid #002b5b; padding-left: 10px; margin-bottom: 15px;'>📊 Histórico de Produção</h3>", unsafe_allow_html=True)
     
     dados_selecionados = None
     if conexao_ok:
@@ -239,7 +241,7 @@ with col2:
             linhas_clicadas = selecao.get("selection", {}).get("rows", [])
             if linhas_clicadas:
                 index_clicado = linhas_clicadas[0]
-                dados_selecionados = linhas[index_clicado]
+                dados_selecionados = lines[index_clicado]
             
             st.write("")
             
@@ -255,7 +257,7 @@ with col2:
                     
                     with c_ed2:
                         tipo_rec = "Sem Tampa" if "Sem Tampa" in novo_nome else "Molde"
-                        g_cera_ed = novo_vol * 0.89 if tipo_rec == "Molde" else novo_vol * 0.86
+                        g_cera_ed = width_vol = novo_vol * 0.89 if tipo_rec == "Molde" else novo_vol * 0.86
                         
                         if novo_tipo == "Cera":
                             ag_ed, ge_ed, c_ge_ed = 0.0, 0.0, 0.0
